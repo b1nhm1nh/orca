@@ -4,7 +4,11 @@ import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { buildSshPtySpawnEnv } from '../main/providers/ssh-pty-spawn-env'
-import { getRelayShellLaunchConfig, isRelayWslShell } from './pty-shell-launch'
+import {
+  getRelayShellLaunchConfig,
+  isRelayWslShell,
+  resolveRelaySpawnExecutable
+} from './pty-shell-launch'
 
 const hasBash = process.platform !== 'win32' && spawnSync('bash', ['--version']).status === 0
 const itWithBash = hasBash ? it : it.skip
@@ -386,5 +390,26 @@ describe('getRelayShellLaunchConfig', () => {
     expect(output).not.toContain('syntax error')
     expect(output).toContain('PROMPT_SEP')
     expectBashOsc133Lifecycle(output)
+  })
+})
+
+describe('relay Cmder launch', () => {
+  it('spawns cmd.exe for the cmder sentinel and leaves real shells alone', () => {
+    expect(resolveRelaySpawnExecutable('cmder')).toBe('cmd.exe')
+    expect(resolveRelaySpawnExecutable('pwsh.exe')).toBe('pwsh.exe')
+  })
+
+  it('never hands the cmder sentinel bare args to cmd.exe on Windows', () => {
+    const config = getRelayShellLaunchConfig('cmder', {}, 'win32')
+    // Why either shape: CI has no Cmder, a dev box may; both must be a valid cmd.exe launch.
+    if (config.args.length > 0) {
+      expect(config.args).toEqual([
+        '/K',
+        'call %ORCA_CMDER_INIT_QUOTE%%ORCA_CMDER_INIT%%ORCA_CMDER_INIT_QUOTE%'
+      ])
+      expect(config.env.ORCA_CMDER_INIT).toMatch(/\\vendor\\init\.bat$/)
+    } else {
+      expect(config.env).toEqual({})
+    }
   })
 })

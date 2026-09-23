@@ -21,6 +21,7 @@ import { shouldSeedPreAttachPtySize } from '../delivery/attached-pty-size'
 import { getStartupTerminalIngressIntent } from '../../terminal-startup-color-query-replies'
 import { resolveConfiguredTerminalShellArgs } from '../configured-terminal-shell-args'
 import type { PtyIpcSpawnState } from './spawn-state'
+import { applyConfiguredCmderRootEnv } from '../../../cmder'
 
 export async function buildPtyIpcSpawnOptions(
   ctx: PtyIpcSpawnState
@@ -120,6 +121,10 @@ export async function buildPtyIpcSpawnOptions(
     })
   }
   if (process.platform === 'win32' && !args.connectionId) {
+    applyConfiguredCmderRootEnv(
+      ctx.spawnOptions,
+      ctx.deps.getSettings?.()?.terminalWindowsCmderPath
+    )
     // Why: the renderer models PowerShell as one shell family; thread the implementation choice so both PTY paths resolve the same executable.
     ctx.spawnOptions.terminalWindowsWslDistro = ctx.expectedWslDistro
     ctx.spawnOptions.terminalWindowsPowerShellImplementation = ctx.deps.getSettings

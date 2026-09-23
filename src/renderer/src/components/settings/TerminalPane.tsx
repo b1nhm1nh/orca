@@ -244,6 +244,7 @@ export function TerminalPane({
         windowsShell={windowsShell}
         gitBashAvailable={gitBashAvailable}
         cmderAvailable={cmderAvailable}
+        cmderPath={settings.terminalWindowsCmderPath ?? ''}
       />
     ) : null,
     matchesSettingsSearch(searchQuery, getTerminalRenderingSearchEntries()) ? (
