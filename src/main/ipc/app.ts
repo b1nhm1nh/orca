@@ -62,9 +62,7 @@ async function pickFloatingMarkdownDocument(
     throw new Error('Selected file is not a markdown document.')
   }
   authorizeExternalPath(filePath)
-  return markdownDocumentFromFilePath(cwd, filePath, {
-    outsideRootRelativePath: 'basename'
-  })
+  return markdownDocumentFromFilePath(cwd, filePath, { outsideRootRelativePath: 'basename' })
 }
 
 async function pickFloatingWorkspaceDirectory(
@@ -156,10 +154,7 @@ function readCommandStdout(
     }
 
     try {
-      child = spawn(command, args, {
-        detached: true,
-        stdio: ['ignore', 'pipe', 'ignore']
-      })
+      child = spawn(command, args, { detached: true, stdio: ['ignore', 'pipe', 'ignore'] })
       let stdout = ''
       child.stdout?.setEncoding('utf8')
       child.stdout?.on('data', (chunk: string) => {
