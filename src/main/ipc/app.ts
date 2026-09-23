@@ -13,6 +13,7 @@ import { getDevInstanceIdentity } from '../startup/dev-instance-identity'
 import { isPwshAvailableAsync } from '../pwsh'
 import { isWslAvailableAsync, listWslDistrosAsync } from '../wsl'
 import { isGitBashAvailable } from '../git-bash'
+import { isCmderAvailable } from '../cmder'
 import { setUnreadDockBadgeCount } from '../dock/unread-badge'
 import { destroySystemTray } from '../tray/system-tray'
 import { authorizeExternalPath } from './filesystem-auth'
@@ -61,7 +62,9 @@ async function pickFloatingMarkdownDocument(
     throw new Error('Selected file is not a markdown document.')
   }
   authorizeExternalPath(filePath)
-  return markdownDocumentFromFilePath(cwd, filePath, { outsideRootRelativePath: 'basename' })
+  return markdownDocumentFromFilePath(cwd, filePath, {
+    outsideRootRelativePath: 'basename'
+  })
 }
 
 async function pickFloatingWorkspaceDirectory(
@@ -153,7 +156,10 @@ function readCommandStdout(
     }
 
     try {
-      child = spawn(command, args, { detached: true, stdio: ['ignore', 'pipe', 'ignore'] })
+      child = spawn(command, args, {
+        detached: true,
+        stdio: ['ignore', 'pipe', 'ignore']
+      })
       let stdout = ''
       child.stdout?.setEncoding('utf8')
       child.stdout?.on('data', (chunk: string) => {
@@ -269,6 +275,7 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
   ipcMain.handle('wsl:listDistros', (): Promise<string[]> => listWslDistrosAsync())
   ipcMain.handle('pwsh:isAvailable', (): Promise<boolean> => isPwshAvailableAsync())
   ipcMain.handle('gitBash:isAvailable', (): boolean => isGitBashAvailable())
+  ipcMain.handle('cmder:isAvailable', (): boolean => isCmderAvailable())
 
   // Why: renderer layout fingerprint tags ABC/CJK-Roman as 'us', breaking Option+letter (#1205); HIToolbox prefs override it.
   ipcMain.handle('app:getKeyboardInputSourceId', async (): Promise<string | null> => {
