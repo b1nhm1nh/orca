@@ -286,6 +286,7 @@ export async function rebuild(options) {${emitAddon}
       electronVersion: options.electronVersion,
       force: options.force,
       ignoreModules: options.ignoreModules,
+      trackFileAccess: process.env.TrackFileAccess ?? null,
       onlyModules: options.onlyModules,
       platform: options.platform
     }) + '\\n'
