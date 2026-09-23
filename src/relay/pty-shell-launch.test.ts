@@ -412,4 +412,24 @@ describe('relay Cmder launch', () => {
       expect(config.env).toEqual({})
     }
   })
+
+  it.skipIf(process.platform !== 'win32')(
+    'resolves Cmder from the pane spawn env CMDER_ROOT',
+    () => {
+      const root = mkdtempSync(join(tmpdir(), 'relay-cmder-'))
+      try {
+        mkdirSync(join(root, 'vendor'))
+        writeFileSync(join(root, 'vendor', 'init.bat'), '@echo off')
+        const config = getRelayShellLaunchConfig('cmder', { CMDER_ROOT: root }, 'win32')
+        expect(config.args).toEqual([
+          '/K',
+          'call %ORCA_CMDER_INIT_QUOTE%%ORCA_CMDER_INIT%%ORCA_CMDER_INIT_QUOTE%'
+        ])
+        expect(config.env.CMDER_ROOT).toBe(root)
+        expect(config.env.ORCA_CMDER_INIT).toBe(join(root, 'vendor', 'init.bat'))
+      } finally {
+        rmSync(root, { recursive: true, force: true })
+      }
+    }
+  )
 })

@@ -61,8 +61,9 @@ export function resolveRelaySpawnExecutable(shellPath: string): string {
   return shellBasename(shellPath) === WINDOWS_CMDER_SHELL ? 'cmd.exe' : shellPath
 }
 
-function getRelayCmderLaunchConfig(): RelayShellLaunchConfig {
-  const root = resolveCmderRoot()
+function getRelayCmderLaunchConfig(spawnEnv: Record<string, string>): RelayShellLaunchConfig {
+  // Why merge: the pane's spawn env may carry a CMDER_ROOT the relay process itself lacks.
+  const root = resolveCmderRoot({ env: { ...process.env, ...spawnEnv } })
   if (!root) {
     return { args: [], env: {}, supportsReadyMarker: false }
   }
@@ -98,7 +99,7 @@ export function getRelayShellLaunchConfig(
   }
   if (platform === 'win32') {
     if (shellName === WINDOWS_CMDER_SHELL) {
-      return getRelayCmderLaunchConfig()
+      return getRelayCmderLaunchConfig(env)
     }
     // Why: pwsh also exists on POSIX remotes; Windows-specific shell args must
     // only apply when the relay itself is running on native Windows.
