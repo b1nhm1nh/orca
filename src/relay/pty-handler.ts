@@ -31,7 +31,12 @@ import {
   listShellProfiles
 } from './pty-shell-utils'
 import { inspectPtyChildProcesses, processHasChildren } from './pty-child-process-inspection'
-import { getRelayShellLaunchConfig, isRelayWslShell } from './pty-shell-launch'
+import {
+  getRelayShellLaunchConfig,
+  isRelayWslShell,
+  resolveRelaySpawnExecutable
+} from './pty-shell-launch'
+import { stripInheritedCmderState } from '../main/cmder'
 import { RetiredPaneSurfaceRegistry } from './retired-pane-surfaces'
 import { applyScrubSafeAgentEnvAliases } from '../shared/agent-hook-scrub-safe-env'
 import { addWslEnvKeys } from '../shared/wsl-env'
@@ -2138,6 +2143,9 @@ export class PtyHandler {
       })
     const managedStartupCommand = shouldProviderDeliverCommand ? command : launchCommandHint
     // Why: both renderer- and provider-delivered startup commands use this marker; the delivering side strips it from output.
+    if (resolveRelaySpawnExecutable(shell) !== shell) {
+      stripInheritedCmderState(spawnEnv)
+    }
     const shellLaunch = getRelayShellLaunchConfig(shell, spawnEnv, process.platform, {
       terminalWindowsWslDistro,
       emitReadyMarker: shouldEmitShellReadyMarker,
@@ -2163,7 +2171,7 @@ export class PtyHandler {
     }
     let term: IPty
     try {
-      term = pty.spawn(shell, shellLaunch.args, {
+      term = pty.spawn(resolveRelaySpawnExecutable(shell), shellLaunch.args, {
         // Why: node-pty overwrites env.TERM with `name`; pass caller-selected TERM so it isn't lost.
         name: spawnEnv.TERM ?? 'xterm-256color',
         cols,
@@ -3309,6 +3317,9 @@ export class PtyHandler {
     if (gitCredentialPromptGuarded) {
       Object.assign(spawnEnv, gitCredentialPromptGuardEnv(spawnEnv, process.platform))
     }
+    if (resolveRelaySpawnExecutable(shell) !== shell) {
+      stripInheritedCmderState(spawnEnv)
+    }
     const shellLaunch = getRelayShellLaunchConfig(shell, spawnEnv, process.platform, {
       terminalWindowsWslDistro
     })
@@ -3319,7 +3330,7 @@ export class PtyHandler {
     }
     let term: IPty
     try {
-      term = ptyMod.spawn(shell, shellLaunch.args, {
+      term = ptyMod.spawn(resolveRelaySpawnExecutable(shell), shellLaunch.args, {
         name: spawnEnv.TERM ?? 'xterm-256color',
         cols: entry.cols,
         rows: entry.rows,
