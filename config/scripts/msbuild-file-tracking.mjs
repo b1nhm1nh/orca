@@ -9,7 +9,11 @@ export function disableMsbuildFileTrackingOnWindows(
   env = process.env,
   platform = process.platform
 ) {
-  if (platform === 'win32' && env.TrackFileAccess === undefined) {
+  // Why any casing: a copied env object is case-sensitive, but Windows treats `trackfileaccess` as the same variable.
+  if (
+    platform === 'win32' &&
+    !Object.keys(env).some((key) => key.toLowerCase() === 'trackfileaccess')
+  ) {
     env.TrackFileAccess = 'false'
   }
   return env

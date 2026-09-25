@@ -15,6 +15,12 @@ describe('disableMsbuildFileTrackingOnWindows', () => {
     })
   })
 
+  it('keeps a caller-set value whatever its casing', () => {
+    expect(disableMsbuildFileTrackingOnWindows({ trackfileaccess: 'true' }, 'win32')).toEqual({
+      trackfileaccess: 'true'
+    })
+  })
+
   it('leaves non-Windows hosts alone', () => {
     expect(disableMsbuildFileTrackingOnWindows({}, 'linux')).toEqual({})
   })
