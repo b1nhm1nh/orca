@@ -26,6 +26,7 @@ import {
   stageWindowsProcessTreeNodeAddonApiHeaders,
   windowsProcessTreeAddonPath
 } from './windows-process-tree-gyp-rebuild.mjs'
+import { disableMsbuildFileTrackingOnWindows } from './msbuild-file-tracking.mjs'
 import {
   copyFileSync,
   existsSync,
@@ -162,12 +163,8 @@ try {
       console.warn('[rebuild] Repaired the un-applied windows-process-tree command-line patch.')
     }
   }
-  // Why: MSBuild's FileTracker writes .tlog files under the package's build dir with no
-  // long-path support (FTK1011), so a deep worktree path fails the link step. The
-  // trackers only feed incremental builds, which `force: true` never uses.
-  if (process.platform === 'win32' && process.env.TrackFileAccess === undefined) {
-    process.env.TrackFileAccess = 'false'
-  }
+  // Why: `force: true` never reads the incremental-build trackers.
+  disableMsbuildFileTrackingOnWindows()
   await rebuild({
     buildPath: projectDir,
     electronVersion,
