@@ -203,18 +203,20 @@ const HEAD_TIMER_CLEANUP_SHA256 = 'c73f1d1c2cc89642f3d727d6f3b6b81860a9d6f342345
 // 530 -> 532, and the host-JSX hash: the tab bar and the accessory bar take a ref that gives the
 // page `keyboardShouldPersistTaps` ('handled', 'always'), which react-native-web ignores. Natively
 // the ref is undefined. 532 -> 531: the live input's reopen flag reads the host OS, not an 'android' literal.
+// 531 -> 535, and every JSX hash: the header title became the workspace switcher's button (its
+// Pressable, chevron and swipe handlers) and the surface mounts the switcher sheet.
 const HEAD_RUNTIME_STRING_SHA256 =
-  'ab8cc43940d3a3e0fdb8df3bdc178b9b61e51c7ccd55a944933862a3c290e8e3'
+  'c29465951f45e9164a9b679efe1e1154b345e1adb46f35cc5ba491e329685f1f'
 // Moved by both of the dock's fields: their refs, and the live one's submit handler, are the seam's now;
 // their keyboard type and remount key read the host OS.
 // Moved again when the terminal frame kept its laid-out width unrounded, for every fit.
 // Again when the frame's onLayout wrote one frame ref and notified a new width imperatively.
 // Again when the frame's first laid-out layout alone subscribes a held-back document.
 // Again when the frame's onLayout made one `notifyTerminalFrame` call.
-const HEAD_HOST_JSX_SHA256 = 'f71b1ee495f67a6e389abf597948ffdff1f9a4a10cde6abefd2611ea4dd94245'
-const HEAD_LEAF_JSX_SHA256 = '62eb05c6e2ac0be6d553a141fc8aa1641fcb0c678777d5d539f490aab8648417'
+const HEAD_HOST_JSX_SHA256 = '5415129bccc9f50a646bebdb6c94a4e5bdf91a9c4b73dfc0e28fcea70303cb51'
+const HEAD_LEAF_JSX_SHA256 = '4f7604d5cac1cd2b5122f6b4a50174c396d7d77bd3a25c5d3d0771a28bd73958'
 const HEAD_STYLE_REFERENCE_SHA256 =
-  '56a005a1f65b30c11092e3422caef67810e1ec50f66fdd06471c370138b1eeb6'
+  'f906a2031dbd86aa4503f81acdb5e9a58af0f7dfe8c8e83cc0abdbfc35ddc3e2'
 const HEAD_IDENTITY_FIELD_SHA256 =
   '91146853930a34dd1f3d80e5c97fbacd7cf19fb93dd26fe8fc6f29169622f9d6'
 const HEAD_NAVIGATION_SHA256 = '9d96f5dad7de555d6553eac39c0fab00efad507470fd562cb9beaa32db16f512'
@@ -654,14 +656,14 @@ describe('mobile session route extraction parity', () => {
 
   it('preserves runtime strings, styles, and the expanded JSX tree', () => {
     const strings = readRuntimeStrings()
-    expect(strings).toHaveLength(531)
+    expect(strings).toHaveLength(535)
     expect(hash(strings)).toBe(HEAD_RUNTIME_STRING_SHA256)
     const jsx = readJsxFacts(readDefinitions())
-    expect(jsx.host).toHaveLength(125)
+    expect(jsx.host).toHaveLength(126)
     expect(hash(jsx.host)).toBe(HEAD_HOST_JSX_SHA256)
-    expect(jsx.leaf).toHaveLength(61)
+    expect(jsx.leaf).toHaveLength(63)
     expect(hash(jsx.leaf)).toBe(HEAD_LEAF_JSX_SHA256)
-    expect(jsx.styleReferences).toHaveLength(173)
+    expect(jsx.styleReferences).toHaveLength(174)
     expect(hash(jsx.styleReferences)).toBe(HEAD_STYLE_REFERENCE_SHA256)
   })
 })
