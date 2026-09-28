@@ -26,15 +26,15 @@ describe('relay background grace preference', () => {
     resetRelayBackgroundGraceForTest()
   })
 
-  it('defaults to 30 seconds', async () => {
+  it('defaults to 5 minutes', async () => {
     expect(await loadRelayBackgroundGraceMs()).toBe(DEFAULT_RELAY_BACKGROUND_GRACE_MS)
   })
 
   it('persists a chosen grace and serves it synchronously', async () => {
-    await saveRelayBackgroundGraceMs(5 * 60_000)
-    expect(relayBackgroundGraceMs()).toBe(5 * 60_000)
+    await saveRelayBackgroundGraceMs(15 * 60_000)
+    expect(relayBackgroundGraceMs()).toBe(15 * 60_000)
     resetRelayBackgroundGraceForTest()
-    expect(await loadRelayBackgroundGraceMs()).toBe(5 * 60_000)
+    expect(await loadRelayBackgroundGraceMs()).toBe(15 * 60_000)
   })
 
   it('falls back to the default for a value that is not one of the choices', async () => {
@@ -45,7 +45,7 @@ describe('relay background grace preference', () => {
   it('arms the relay grace timer with the chosen duration', async () => {
     vi.useFakeTimers()
     try {
-      await saveRelayBackgroundGraceMs(2 * 60_000)
+      await saveRelayBackgroundGraceMs(30_000)
       const onExpired = vi.fn()
       const timer = new MobileRelayBackgroundGraceTimer(
         {
@@ -56,9 +56,9 @@ describe('relay background grace preference', () => {
         onExpired
       )
       timer.arm()
-      await vi.advanceTimersByTimeAsync(DEFAULT_RELAY_BACKGROUND_GRACE_MS)
+      await vi.advanceTimersByTimeAsync(30_000 - 1)
       expect(onExpired).not.toHaveBeenCalled()
-      await vi.advanceTimersByTimeAsync(2 * 60_000 - DEFAULT_RELAY_BACKGROUND_GRACE_MS)
+      await vi.advanceTimersByTimeAsync(1)
       expect(onExpired).toHaveBeenCalledOnce()
     } finally {
       vi.useRealTimers()
