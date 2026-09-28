@@ -7,6 +7,7 @@ import { StatusDot } from '../components/StatusDot'
 import { useRpcClientContext } from '../transport/client-context'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
 import type { RecentWorkspace } from '../worktree/recent-workspaces'
+import { hostWorkspaceLabel, useShowHostInWorkspaceTitles } from '../settings/host-workspace-label'
 import type { WorkspaceSwitcher } from './use-workspace-switcher'
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
 export function WorkspaceSwitcherSheet({ switcher, currentHostId, currentWorktreeId }: Props) {
   const { visible, close, groups, switchToWorkspace, switchToHost } = switcher
   const { getKnownState } = useRpcClientContext()
+  const showHost = useShowHostInWorkspaceTitles()
   const [closing, setClosing] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -46,8 +48,9 @@ export function WorkspaceSwitcherSheet({ switcher, currentHostId, currentWorktre
     [close]
   )
 
-  const renderWorkspace = (item: RecentWorkspace) => {
+  const renderWorkspace = (item: RecentWorkspace, hostName: string) => {
     const current = item.hostId === currentHostId && item.worktreeId === currentWorktreeId
+    const label = hostWorkspaceLabel(showHost, hostName, item.name || item.worktreeId)
     return (
       <Pressable
         key={item.worktreeId}
@@ -55,10 +58,10 @@ export function WorkspaceSwitcherSheet({ switcher, currentHostId, currentWorktre
         disabled={current}
         onPress={() => closeThen(() => switchToWorkspace(item))}
         accessibilityRole="button"
-        accessibilityLabel={`Switch to ${item.name || item.worktreeId}`}
+        accessibilityLabel={`Switch to ${label}`}
       >
         <Text style={[styles.rowText, current && styles.rowTextCurrent]} numberOfLines={1}>
-          {item.name || item.worktreeId}
+          {label}
         </Text>
         {current ? <Check size={14} color={colors.textPrimary} /> : null}
       </Pressable>
@@ -89,7 +92,7 @@ export function WorkspaceSwitcherSheet({ switcher, currentHostId, currentWorktre
               <ChevronRight size={14} color={colors.textMuted} />
             </Pressable>
             {group.workspaces.length > 0 ? (
-              group.workspaces.map(renderWorkspace)
+              group.workspaces.map((item) => renderWorkspace(item, group.hostName))
             ) : (
               <Text style={styles.empty}>No recent workspaces</Text>
             )}

@@ -15,6 +15,7 @@ export function MobileHomeListFooter(props: {
   primaryHost: HostProfile | null
   primaryTaskProviders: TaskProvider[]
   resumeCard: HomeResumeCard | null
+  resumeHostName: string | null
   onCreateWorkspace: (hostId: string) => void
   onOpenAccounts: (hostId: string) => void
   onOpenResume: (card: HomeResumeCard) => void
@@ -26,7 +27,11 @@ export function MobileHomeListFooter(props: {
       {props.resumeCard ? (
         <>
           <Text style={styles.sectionHeading}>Resume</Text>
-          <MobileHomeResumeCard card={props.resumeCard} onOpen={props.onOpenResume} />
+          <MobileHomeResumeCard
+            card={props.resumeCard}
+            hostName={props.resumeHostName}
+            onOpen={props.onOpenResume}
+          />
         </>
       ) : null}
       <Text style={styles.sectionHeading}>Tasks</Text>

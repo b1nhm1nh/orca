@@ -133,6 +133,9 @@ export function MobileHomeScreen() {
               primaryHost={data.primaryHost}
               primaryTaskProviders={data.primaryTaskProviders}
               resumeCard={data.resumeCard}
+              resumeHostName={
+                data.hostCatalog.find((host) => host.id === data.resumeCard?.hostId)?.name ?? null
+              }
               onCreateWorkspace={(hostId) => data.router.push(hostNewWorktreeRoute(hostId))}
               onOpenAccounts={openMobileAccounts}
               onOpenResume={openResume}

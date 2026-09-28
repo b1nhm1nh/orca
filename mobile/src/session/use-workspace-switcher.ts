@@ -139,11 +139,14 @@ export function useWorkspaceSwitcher({
     })
   ).current.panHandlers
 
+  const currentHostName = hosts.find((host) => host.id === hostId)?.name ?? null
+
   return {
     visible,
     open,
     close,
     groups,
+    currentHostName,
     flipTarget,
     swipeHandlers,
     switchToWorkspace,
