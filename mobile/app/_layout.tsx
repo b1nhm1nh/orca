@@ -24,6 +24,7 @@ import { ensureDesktopNotificationChannel } from '../src/notifications/desktop-n
 import { loadHostCatalog } from '../src/transport/host-store'
 import { extractPairingCodeFromUrl } from '../src/transport/pairing'
 import { recoverMobileRelayPairing } from '../src/transport/mobile-relay-pairing-recovery'
+import { loadRelayBackgroundGraceMs } from '../src/transport/relay-background-grace-preference'
 
 // Why: keeps the native splash screen visible until the React tree is mounted
 // and ready to render. Without this the user sees a blank white/black frame
@@ -64,6 +65,9 @@ export default function RootLayout() {
 
   // Why: a rolled APNs/FCM token stops delivering silently, so every paired host
   // has to be re-registered with the new one as soon as the provider hands it over.
+  useEffect(() => {
+    void loadRelayBackgroundGraceMs()
+  }, [])
   useEffect(() => startPushTokenSync(), [])
   useEffect(() => startAndroidForegroundPushPresentation(), [])
 
@@ -225,6 +229,7 @@ export default function RootLayout() {
           <Stack.Screen name="terminal-settings" options={{ headerShown: false }} />
           <Stack.Screen name="native-chat-settings" options={{ headerShown: false }} />
           <Stack.Screen name="browser-settings" options={{ headerShown: false }} />
+          <Stack.Screen name="connection-settings" options={{ headerShown: false }} />
           <Stack.Screen name="voice-settings" options={{ headerShown: false }} />
           <Stack.Screen name="notifications" options={{ headerShown: false }} />
           <Stack.Screen name="troubleshoot" options={{ headerShown: false }} />
