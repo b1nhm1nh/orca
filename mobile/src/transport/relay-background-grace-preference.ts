@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const RELAY_BACKGROUND_GRACE_STORAGE_KEY = 'orca:relayBackgroundGraceMs'
-export const DEFAULT_RELAY_BACKGROUND_GRACE_MS = 30_000
+export const DEFAULT_RELAY_BACKGROUND_GRACE_MS = 5 * 60_000
 export const RELAY_BACKGROUND_GRACE_CHOICES_MS = [
-  DEFAULT_RELAY_BACKGROUND_GRACE_MS,
+  30_000,
   2 * 60_000,
   5 * 60_000,
   15 * 60_000

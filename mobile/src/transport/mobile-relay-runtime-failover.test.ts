@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { saveRelayBackgroundGraceMs } from './relay-background-grace-preference'
 import { connect, type RpcClient } from './rpc-client'
 import {
   createStableLogicalRpcClient,
@@ -237,6 +238,8 @@ function dependencies(
 
 describe('relay runtime recovery without direct connectivity', () => {
   beforeEach(() => {
+    // These pin the relay grace timing at its 30-second choice, independent of the app default.
+    void saveRelayBackgroundGraceMs(30_000)
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-08-02T12:00:00Z'))

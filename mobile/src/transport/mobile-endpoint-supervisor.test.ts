@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { saveRelayBackgroundGraceMs } from './relay-background-grace-preference'
 import type { MobileRelayCredentialBundle } from './mobile-relay-credential-bundle'
 import { hashMobileRelayCredential } from './mobile-relay-credential-hash'
 import { RelayOuterError } from './mobile-relay-e2ee-link'
@@ -20,6 +21,8 @@ vi.mock('expo-crypto', () => ({ getRandomBytes: (length: number) => new Uint8Arr
 
 describe('mobile endpoint supervisor', () => {
   beforeEach(() => {
+    // These pin the relay grace timing at its 30-second choice, independent of the app default.
+    void saveRelayBackgroundGraceMs(30_000)
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-13T12:00:00Z'))
   })
