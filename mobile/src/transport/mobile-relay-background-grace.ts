@@ -1,14 +1,20 @@
 import type { RelayReconnectController } from './mobile-relay-reconnect-controller'
 import type { StableLogicalRpcClient } from './stable-logical-rpc-client'
 import type { ScheduleTimer } from './timer-scheduler'
+import {
+  DEFAULT_RELAY_BACKGROUND_GRACE_MS,
+  relayBackgroundGraceMs
+} from './relay-background-grace-preference'
 
 // Retain a healthy Relay briefly across routine app switches without waking the app.
-export const RELAY_BACKGROUND_GRACE_MS = 30_000
+export const RELAY_BACKGROUND_GRACE_MS = DEFAULT_RELAY_BACKGROUND_GRACE_MS
 
 type RelayBackgroundGraceDependencies = {
   now: () => number
   setTimer: ScheduleTimer
   clearTimer: typeof clearTimeout
+  /** Read on every arm, so a changed setting applies from the next background. */
+  graceMs?: () => number
 }
 
 export class MobileRelayBackgroundGraceTimer {
@@ -23,7 +29,8 @@ export class MobileRelayBackgroundGraceTimer {
 
   arm(): void {
     this.clear()
-    this.deadlineAt = this.dependencies.now() + RELAY_BACKGROUND_GRACE_MS
+    const graceMs = (this.dependencies.graceMs ?? relayBackgroundGraceMs)()
+    this.deadlineAt = this.dependencies.now() + graceMs
     const generation = this.generation
     this.timer = this.dependencies.setTimer(() => {
       if (generation !== this.generation || this.deadlineAt === null) {
@@ -32,7 +39,7 @@ export class MobileRelayBackgroundGraceTimer {
       this.timer = null
       this.deadlineAt = null
       this.onExpired()
-    }, RELAY_BACKGROUND_GRACE_MS)
+    }, graceMs)
   }
 
   consumeExpired(): boolean {
