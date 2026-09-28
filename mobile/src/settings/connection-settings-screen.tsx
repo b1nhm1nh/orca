@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
-import { ChevronLeft, ChevronRight, Timer } from 'lucide-react-native'
+import { ChevronLeft, ChevronRight, Download, Timer, Upload } from 'lucide-react-native'
 import { PickerModal, type PickerOption } from '../components/PickerModal'
 import {
   DEFAULT_RELAY_BACKGROUND_GRACE_MS,
@@ -11,6 +11,12 @@ import {
   saveRelayBackgroundGraceMs
 } from '../transport/relay-background-grace-preference'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
+import { exportDeviceBackupToFile, importDeviceBackupFromFile } from './device-backup-file'
+import {
+  reloadShowHostInWorkspaceTitles,
+  saveShowHostInWorkspaceTitles,
+  useShowHostInWorkspaceTitles
+} from './host-workspace-label'
 
 function graceLabel(ms: number): string {
   const label = ms < 60_000 ? `${ms / 1000} seconds` : `${ms / 60_000} minutes`
@@ -32,6 +38,9 @@ export default function ConnectionSettingsScreen({
   const [graceMs, setGraceMs] = useState(DEFAULT_RELAY_BACKGROUND_GRACE_MS)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [backupStatus, setBackupStatus] = useState<string | null>(null)
+  const [backupBusy, setBackupBusy] = useState(false)
+  const showHost = useShowHostInWorkspaceTitles()
 
   useEffect(() => {
     let active = true
@@ -48,6 +57,32 @@ export default function ConnectionSettingsScreen({
     void saveRelayBackgroundGraceMs(ms).catch(() =>
       setError('Could not save connection preferences. Try again.')
     )
+  }, [])
+
+  const runBackup = useCallback(async (kind: 'export' | 'import') => {
+    setBackupBusy(true)
+    setBackupStatus(null)
+    try {
+      if (kind === 'export') {
+        const name = await exportDeviceBackupToFile()
+        if (name) {
+          setBackupStatus(`Saved ${name}. It contains your host secrets — keep it private.`)
+        }
+        return
+      }
+      const result = await importDeviceBackupFromFile()
+      if (result) {
+        setGraceMs(await loadRelayBackgroundGraceMs())
+        await reloadShowHostInWorkspaceTitles()
+        setBackupStatus(
+          `Imported ${result.hosts} hosts (${result.relayCredentials} with relay) and ${result.settings} settings. Restart Orca to apply every setting.`
+        )
+      }
+    } catch (err) {
+      setBackupStatus(err instanceof Error ? err.message : 'Backup failed. Try again.')
+    } finally {
+      setBackupBusy(false)
+    }
   }, [])
 
   return (
@@ -89,6 +124,67 @@ export default function ConnectionSettingsScreen({
               <Text style={styles.rowSublabel}>{graceLabel(graceMs)}</Text>
             </View>
             <ChevronRight size={16} color={colors.textMuted} />
+          </Pressable>
+        </View>
+
+        <Text style={[styles.groupHeading, styles.groupGap]}>HOST NAMES</Text>
+        <View style={[styles.section, styles.sectionTopGap]}>
+          <View style={styles.row}>
+            <View style={styles.rowContent}>
+              <Text style={styles.rowLabel}>Show host before workspace</Text>
+              <Text style={styles.rowSublabel}>
+                {showHost ? 'e.g. "BMM1: orca"' : 'Workspace name only'}
+              </Text>
+            </View>
+            <Switch
+              accessibilityLabel="Show host before workspace"
+              value={showHost}
+              onValueChange={(next) => void saveShowHostInWorkspaceTitles(next)}
+              trackColor={{ false: colors.bgRaised, true: colors.textSecondary }}
+              thumbColor={colors.textPrimary}
+            />
+          </View>
+        </View>
+
+        <Text style={[styles.groupHeading, styles.groupGap]}>BACKUP</Text>
+        <Text style={styles.groupDescription}>
+          Export paired hosts (including their secret tokens and relay credentials) and your
+          settings to a JSON file, then import it on another phone. Anyone with the file can connect
+          to your hosts. Using the same relay credential on two phones can make one of them need
+          re-pairing.
+        </Text>
+        {backupStatus && (
+          <Text accessibilityRole="alert" style={styles.groupDescription}>
+            {backupStatus}
+          </Text>
+        )}
+        <View style={[styles.section, styles.sectionTopGap]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Export hosts and settings"
+            disabled={backupBusy}
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={() => void runBackup('export')}
+          >
+            <Upload size={16} color={colors.textSecondary} />
+            <View style={styles.rowContent}>
+              <Text style={styles.rowLabel}>Export hosts and settings</Text>
+              <Text style={styles.rowSublabel}>Choose a folder to save the file</Text>
+            </View>
+          </Pressable>
+          <View style={styles.separator} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Import hosts and settings"
+            disabled={backupBusy}
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={() => void runBackup('import')}
+          >
+            <Download size={16} color={colors.textSecondary} />
+            <View style={styles.rowContent}>
+              <Text style={styles.rowLabel}>Import hosts and settings</Text>
+              <Text style={styles.rowSublabel}>Pick a backup file</Text>
+            </View>
           </Pressable>
         </View>
       </ScrollView>
@@ -155,6 +251,14 @@ const styles = StyleSheet.create({
   },
   sectionTopGap: {
     marginTop: spacing.sm
+  },
+  groupGap: {
+    marginTop: spacing.lg
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.borderSubtle,
+    marginLeft: spacing.md + 2
   },
   row: {
     flexDirection: 'row',

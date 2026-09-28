@@ -25,6 +25,7 @@ import { styles } from './mobile-session-styles'
 import { useKeyboardPersistingTaps } from '../platform/keyboard-persisting-taps'
 import type { MobileSessionController } from './use-mobile-session-controller'
 import type { WorkspaceSwitcher } from './use-workspace-switcher'
+import { hostWorkspaceLabel, useShowHostInWorkspaceTitles } from '../settings/host-workspace-label'
 
 export function MobileSessionHeader({
   controller,
@@ -33,6 +34,7 @@ export function MobileSessionHeader({
   controller: MobileSessionController
   switcher: WorkspaceSwitcher
 }) {
+  const showHost = useShowHostInWorkspaceTitles()
   const {
     hostId,
     isFolderWorkspaceRoute,
@@ -93,7 +95,7 @@ export function MobileSessionHeader({
             }
           >
             <Text style={styles.sessionTitle} numberOfLines={1}>
-              {worktreeName || 'Terminal'}
+              {hostWorkspaceLabel(showHost, switcher.currentHostName, worktreeName || 'Terminal')}
             </Text>
             <ChevronDown size={14} color={colors.textMuted} strokeWidth={2.2} />
           </Pressable>

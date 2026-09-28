@@ -2,6 +2,7 @@ import { ChevronRight, Terminal } from 'lucide-react-native'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { colors, radii, spacing } from '../theme/mobile-theme'
 import type { HomeResumeCard } from '../worktree/home-resume-card'
+import { hostWorkspaceLabel, useShowHostInWorkspaceTitles } from '../settings/host-workspace-label'
 
 const REPO_COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4']
 
@@ -15,8 +16,10 @@ function homeResumeRepoColor(name: string): string {
 
 export function MobileHomeResumeCard(props: {
   card: HomeResumeCard
+  hostName: string | null
   onOpen: (card: HomeResumeCard) => void
 }) {
+  const showHost = useShowHostInWorkspaceTitles()
   return (
     <Pressable
       disabled={!props.card.actionable}
@@ -32,7 +35,7 @@ export function MobileHomeResumeCard(props: {
       </View>
       <View style={styles.resumeMain}>
         <Text style={styles.resumeTitle} numberOfLines={1}>
-          {props.card.worktree.displayName}
+          {hostWorkspaceLabel(showHost, props.hostName, props.card.worktree.displayName)}
         </Text>
         <View style={styles.resumeSub}>
           <View
