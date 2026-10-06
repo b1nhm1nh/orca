@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { saveRelayBackgroundGraceMs } from './relay-background-grace-preference'
+import { resetRelayBackgroundGraceForTest } from './relay-background-grace-preference'
 import {
   dependencies,
   FakeLogicalClient,
@@ -17,7 +17,7 @@ vi.mock('expo-crypto', () => ({ getRandomBytes: (length: number) => new Uint8Arr
 describe('mobile Relay background lifecycle', () => {
   beforeEach(() => {
     // These pin the relay grace timing at its 30-second choice, independent of the app default.
-    void saveRelayBackgroundGraceMs(30_000)
+    resetRelayBackgroundGraceForTest(30_000)
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-13T12:00:00Z'))
   })

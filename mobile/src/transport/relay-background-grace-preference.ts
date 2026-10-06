@@ -37,6 +37,8 @@ export async function saveRelayBackgroundGraceMs(ms: number): Promise<void> {
   await AsyncStorage.setItem(RELAY_BACKGROUND_GRACE_STORAGE_KEY, String(current))
 }
 
-export function resetRelayBackgroundGraceForTest(): void {
-  current = DEFAULT_RELAY_BACKGROUND_GRACE_MS
+export function resetRelayBackgroundGraceForTest(
+  ms: number = DEFAULT_RELAY_BACKGROUND_GRACE_MS
+): void {
+  current = ms
 }
