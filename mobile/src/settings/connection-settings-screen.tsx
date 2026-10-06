@@ -11,7 +11,13 @@ import {
   saveRelayBackgroundGraceMs
 } from '../transport/relay-background-grace-preference'
 import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-import { exportDeviceBackupToFile, importDeviceBackupFromFile } from './device-backup-file'
+import { BackupPasswordDrawer, type BackupPasswordMode } from './BackupPasswordDrawer'
+import {
+  exportDeviceBackupToFile,
+  importPickedDeviceBackup,
+  pickDeviceBackupFile,
+  type PickedDeviceBackup
+} from './device-backup-file'
 import {
   reloadShowHostInWorkspaceTitles,
   saveShowHostInWorkspaceTitles,
@@ -59,30 +65,71 @@ export default function ConnectionSettingsScreen({
     )
   }, [])
 
-  const runBackup = useCallback(async (kind: 'export' | 'import') => {
+  const [passwordMode, setPasswordMode] = useState<BackupPasswordMode | null>(null)
+  // Why: import reads the file before asking, so plain backups from older builds need no password.
+  const [pendingImport, setPendingImport] = useState<PickedDeviceBackup | null>(null)
+
+  const runBackupStep = useCallback(async (step: () => Promise<void>) => {
     setBackupBusy(true)
     setBackupStatus(null)
     try {
-      if (kind === 'export') {
-        const name = await exportDeviceBackupToFile()
-        if (name) {
-          setBackupStatus(`Saved ${name}. It contains your host secrets — keep it private.`)
-        }
-        return
-      }
-      const result = await importDeviceBackupFromFile()
-      if (result) {
-        setGraceMs(await loadRelayBackgroundGraceMs())
-        await reloadShowHostInWorkspaceTitles()
-        setBackupStatus(
-          `Imported ${result.hosts} hosts (${result.relayCredentials} with relay) and ${result.settings} settings. Restart Orca to apply every setting.`
-        )
-      }
+      await step()
     } catch (err) {
       setBackupStatus(err instanceof Error ? err.message : 'Backup failed. Try again.')
     } finally {
       setBackupBusy(false)
     }
+  }, [])
+
+  const finishImport = useCallback(async (picked: PickedDeviceBackup, password: string | null) => {
+    const result = await importPickedDeviceBackup(picked, password)
+    setGraceMs(await loadRelayBackgroundGraceMs())
+    await reloadShowHostInWorkspaceTitles()
+    setBackupStatus(
+      `Imported ${result.hosts} hosts (${result.relayCredentials} with relay) and ${result.settings} settings. Restart Orca to apply every setting.`
+    )
+  }, [])
+
+  const startImport = useCallback(
+    () =>
+      runBackupStep(async () => {
+        const picked = await pickDeviceBackupFile()
+        if (!picked) {
+          return
+        }
+        if (picked.encrypted) {
+          setPendingImport(picked)
+          setPasswordMode('import')
+          return
+        }
+        await finishImport(picked, null)
+      }),
+    [finishImport, runBackupStep]
+  )
+
+  const submitPassword = useCallback(
+    (password: string) => {
+      const mode = passwordMode
+      const picked = pendingImport
+      setPasswordMode(null)
+      setPendingImport(null)
+      void runBackupStep(async () => {
+        if (mode === 'export') {
+          setBackupStatus('Encrypting…')
+          const name = await exportDeviceBackupToFile(password)
+          setBackupStatus(name ? `Saved ${name}, encrypted with your password.` : null)
+        } else if (mode === 'import' && picked) {
+          setBackupStatus('Decrypting…')
+          await finishImport(picked, password)
+        }
+      })
+    },
+    [finishImport, passwordMode, pendingImport, runBackupStep]
+  )
+
+  const cancelPassword = useCallback(() => {
+    setPasswordMode(null)
+    setPendingImport(null)
   }, [])
 
   return (
@@ -149,9 +196,9 @@ export default function ConnectionSettingsScreen({
         <Text style={[styles.groupHeading, styles.groupGap]}>BACKUP</Text>
         <Text style={styles.groupDescription}>
           Export paired hosts (including their secret tokens and relay credentials) and your
-          settings to a JSON file, then import it on another phone. Anyone with the file can connect
-          to your hosts. Using the same relay credential on two phones can make one of them need
-          re-pairing.
+          settings to a file encrypted with a password you choose, then import it on another phone
+          with the same password. Using the same relay credential on two phones can make one of them
+          need re-pairing.
         </Text>
         {backupStatus && (
           <Text accessibilityRole="alert" style={styles.groupDescription}>
@@ -164,12 +211,12 @@ export default function ConnectionSettingsScreen({
             accessibilityLabel="Export hosts and settings"
             disabled={backupBusy}
             style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-            onPress={() => void runBackup('export')}
+            onPress={() => setPasswordMode('export')}
           >
             <Upload size={16} color={colors.textSecondary} />
             <View style={styles.rowContent}>
               <Text style={styles.rowLabel}>Export hosts and settings</Text>
-              <Text style={styles.rowSublabel}>Choose a folder to save the file</Text>
+              <Text style={styles.rowSublabel}>Set a password, then choose a folder</Text>
             </View>
           </Pressable>
           <View style={styles.separator} />
@@ -178,7 +225,7 @@ export default function ConnectionSettingsScreen({
             accessibilityLabel="Import hosts and settings"
             disabled={backupBusy}
             style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-            onPress={() => void runBackup('import')}
+            onPress={() => void startImport()}
           >
             <Download size={16} color={colors.textSecondary} />
             <View style={styles.rowContent}>
@@ -196,6 +243,11 @@ export default function ConnectionSettingsScreen({
         selected={String(graceMs)}
         onSelect={selectGrace}
         onClose={() => setPickerOpen(false)}
+      />
+      <BackupPasswordDrawer
+        mode={passwordMode}
+        onSubmit={submitPassword}
+        onCancel={cancelPassword}
       />
     </View>
   )
