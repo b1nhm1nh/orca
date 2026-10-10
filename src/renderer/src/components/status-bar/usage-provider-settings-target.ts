@@ -21,8 +21,10 @@ export function getUsageProviderAccountsSectionId(
       return 'accounts-cursor'
     case 'antigravity':
     case 'kimi':
+    case 'ninerouter':
       // Why: Orca must not mutate Kimi's CLI-owned credential lifecycle.
       // Antigravity credentials live in the agy CLI; quota is fetched directly via agy.
+      // 9router accounts are managed in 9router's own dashboard.
       return null
     case 'zcode':
       return 'accounts-zcode'

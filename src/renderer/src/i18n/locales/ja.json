@@ -103,7 +103,8 @@
         "antigravityToggleDescription": "アクティブなワークスペースの Antigravity サブスクリプション使用量を表示します。",
         "grokToggleDescription": "Grok CLI でサインインしている場合に Grok サブスクリプションのクレジット使用量を表示します。",
         "cursorToggleDescription": "cursor-agent または Cursor IDE でサインインしている場合に Cursor プランの使用状況を表示します。",
-        "zcodeToggleDescription": "ZCode コーディングプランのクォータ使用量を表示します。"
+        "zcodeToggleDescription": "ZCode コーディングプランのクォータ使用量を表示します。",
+        "ninerouterToggleDescription": "Show quota for the models 9router routed in the last 24 hours."
       },
       "menuBarIcon": {
         "title": "メニューバーアイコンを表示",
@@ -3880,7 +3881,8 @@
             "codexSignInError": "Codex のサインインに失敗しました。もう一度お試しください。",
             "cursorUsageMenu": "Cursor の使用状況",
             "hiddenUsageProviders": "ほかに: {{value0}}",
-            "zcodeUsageMenu": "ZCode の使用量"
+            "zcodeUsageMenu": "ZCode の使用量",
+            "ninerouterUsageMenu": "9router Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "アカウントを接続する",
@@ -9488,7 +9490,10 @@
             "zcodeUsageDescription": "ZCode コーディングプランのクォータの使用状況をステータスバーに表示します。",
             "zcode": "zコード",
             "zai": "ザイ",
-            "glm": "グルム"
+            "glm": "グルム",
+            "ninerouterUsageTitle": "9router Usage",
+            "ninerouterUsageDescription": "Show quota for the models the local 9router gateway is routing in the status bar.",
+            "ninerouter": "9router"
           }
         },
         "auto": {

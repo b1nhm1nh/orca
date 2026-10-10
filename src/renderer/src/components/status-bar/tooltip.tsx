@@ -3,6 +3,7 @@ import {
   formatResetCountdown,
   formatResetDuration
 } from '../../../../shared/rate-limit-reset-format'
+import { Route } from 'lucide-react'
 import { AgentIcon } from '@/lib/agent-catalog'
 import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
 import { translate } from '@/i18n/i18n'
@@ -110,6 +111,9 @@ export function ProviderIcon({ provider }: { provider: string }): React.JSX.Elem
   }
   if (provider === 'cursor') {
     return <AgentIcon agent="cursor" size={13} />
+  }
+  if (provider === 'ninerouter') {
+    return <Route size={13} className="text-muted-foreground" />
   }
   return <ClaudeIcon size={13} />
 }

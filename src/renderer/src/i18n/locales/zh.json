@@ -103,7 +103,8 @@
         "antigravityToggleDescription": "显示当前工作区的 Antigravity 订阅使用情况。",
         "grokToggleDescription": "通过 Grok CLI 登录后显示 Grok 订阅额度使用情况。",
         "cursorToggleDescription": "通过 cursor-agent 或 Cursor IDE 登录后显示 Cursor 套餐用量。",
-        "zcodeToggleDescription": "显示 ZCode 编码计划配额使用情况。"
+        "zcodeToggleDescription": "显示 ZCode 编码计划配额使用情况。",
+        "ninerouterToggleDescription": "Show quota for the models 9router routed in the last 24 hours."
       },
       "menuBarIcon": {
         "title": "显示菜单栏图标",
@@ -3880,7 +3881,8 @@
             "codexSignInError": "Codex 登录失败，请重试。",
             "cursorUsageMenu": "Cursor 用量",
             "hiddenUsageProviders": "另有：{{value0}}",
-            "zcodeUsageMenu": "Z代码使用"
+            "zcodeUsageMenu": "Z代码使用",
+            "ninerouterUsageMenu": "9router Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "连接账户",
@@ -9451,7 +9453,10 @@
             "zcodeUsageDescription": "在状态栏中显示 ZCode 编码计划配额使用情况。",
             "zcode": "零码",
             "zai": "在",
-            "glm": "格鲁姆"
+            "glm": "格鲁姆",
+            "ninerouterUsageTitle": "9router Usage",
+            "ninerouterUsageDescription": "Show quota for the models the local 9router gateway is routing in the status bar.",
+            "ninerouter": "9router"
           }
         },
         "auto": {

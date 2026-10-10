@@ -27,10 +27,11 @@ export function getStatusBarUsageSections(
     return headline ? [{ key: 'headline', ...headline }] : []
   }
   if (p.buckets?.length) {
-    // Antigravity pool names vary by account tier; Gemini's experimental pools stay hidden.
+    // Antigravity pool names vary by account tier and 9router buckets are model ids; Gemini's experimental pools stay hidden.
     const buckets = p.buckets.filter(
       (bucket) =>
         p.provider === 'antigravity' ||
+        p.provider === 'ninerouter' ||
         STATUS_BAR_BUCKET_NAMES.has(bucket.name) ||
         isCursorUsageBucket(bucket.name)
     )

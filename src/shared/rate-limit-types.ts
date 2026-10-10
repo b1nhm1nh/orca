@@ -86,6 +86,7 @@ export type ProviderRateLimits = {
     | 'antigravity'
     | 'cursor'
     | 'zcode'
+    | 'ninerouter'
   /** 5-hour session window, null if not available. */
   session: RateLimitWindow | null
   /** 7-day weekly window, null if not available. */
@@ -170,6 +171,8 @@ export type RateLimitState = {
   grok: ProviderRateLimits | null
   cursor: ProviderRateLimits | null
   zcode: ProviderRateLimits | null
+  /** Per-model quota of what the local 9router gateway routed in the last 24h. */
+  ninerouter?: ProviderRateLimits | null
   /**
    * True when a MiniMax session cookie is persisted on disk. The cookie lives
    * outside GlobalSettings, so this flag is the durable signal that the

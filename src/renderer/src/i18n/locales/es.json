@@ -103,7 +103,8 @@
         "antigravityToggleDescription": "Muestra el uso de suscripción de Antigravity para el espacio de trabajo activo.",
         "grokToggleDescription": "Muestra el uso de créditos de suscripción de Grok cuando has iniciado sesión con Grok CLI.",
         "cursorToggleDescription": "Muestra el uso del plan de Cursor cuando inicias sesión con cursor-agent o el IDE de Cursor.",
-        "zcodeToggleDescription": "Mostrar el uso de la cuota del plan de codificación ZCode."
+        "zcodeToggleDescription": "Mostrar el uso de la cuota del plan de codificación ZCode.",
+        "ninerouterToggleDescription": "Show quota for the models 9router routed in the last 24 hours."
       },
       "menuBarIcon": {
         "title": "Mostrar icono en la barra de menús",
@@ -3875,7 +3876,8 @@
             "codexSignInError": "No se pudo iniciar sesión en Codex. Inténtalo de nuevo.",
             "cursorUsageMenu": "Uso de Cursor",
             "hiddenUsageProviders": "También: {{value0}}",
-            "zcodeUsageMenu": "Uso del código Z"
+            "zcodeUsageMenu": "Uso del código Z",
+            "ninerouterUsageMenu": "9router Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "Conectar una cuenta",
@@ -9454,6 +9456,9 @@
             "zcode": "código z",
             "zai": "zai",
             "glm": "glm",
+            "ninerouterUsageTitle": "9router Usage",
+            "ninerouterUsageDescription": "Show quota for the models the local 9router gateway is routing in the status bar.",
+            "ninerouter": "9router",
             "tray": {
               "tray": "bandeja",
               "system": "bandeja del sistema",

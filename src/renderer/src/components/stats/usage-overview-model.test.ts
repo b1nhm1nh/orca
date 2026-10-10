@@ -160,7 +160,8 @@ describe('usage overview model', () => {
         summary: openCodeSummary,
         daily: openCodeDaily
       },
-      muse: { scanState: null, summary: null, daily: [] }
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.totalTokens).toBe(10_800)
@@ -180,6 +181,7 @@ describe('usage overview model', () => {
       codexTokens: 2_000,
       openCodeTokens: 0,
       museTokens: 0,
+      nineRouterTokens: 0,
       intensity: 4
     })
     expect(overview.providers.find((provider) => provider.id === 'codex')).toMatchObject({
@@ -216,7 +218,8 @@ describe('usage overview model', () => {
         claude: { scanState: null, summary: null, daily: [] },
         codex: { scanState: enabledCodexScanState(), summary: codexSummary, daily: [] },
         opencode: { scanState: null, summary: null, daily: [] },
-        muse: { scanState: null, summary: null, daily: [] }
+        muse: { scanState: null, summary: null, daily: [] },
+        ninerouter: { scanState: null, summary: null, daily: [] }
       })
     }
 
@@ -264,7 +267,8 @@ describe('usage overview model', () => {
             totalTokens: 28_300
           }
         ]
-      }
+      },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.providers.find((provider) => provider.id === 'muse')).toMatchObject({
@@ -288,6 +292,7 @@ describe('usage overview model', () => {
           codexTokens: 2_000,
           openCodeTokens: 0,
           museTokens: 0,
+          nineRouterTokens: 0,
           intensity: 4
         }
       ],
@@ -303,6 +308,7 @@ describe('usage overview model', () => {
         codexTokens: 0,
         openCodeTokens: 0,
         museTokens: 0,
+        nineRouterTokens: 0,
         intensity: 0
       },
       {
@@ -312,6 +318,7 @@ describe('usage overview model', () => {
         codexTokens: 2_000,
         openCodeTokens: 0,
         museTokens: 0,
+        nineRouterTokens: 0,
         intensity: 4
       },
       {
@@ -321,6 +328,7 @@ describe('usage overview model', () => {
         codexTokens: 0,
         openCodeTokens: 0,
         museTokens: 0,
+        nineRouterTokens: 0,
         intensity: 0
       }
     ])
@@ -331,7 +339,8 @@ describe('usage overview model', () => {
       claude: { scanState: null, summary: null, daily: [] },
       codex: { scanState: null, summary: null, daily: [] },
       opencode: { scanState: null, summary: null, daily: [] },
-      muse: { scanState: null, summary: null, daily: [] }
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.hasAnyEnabledProvider).toBe(false)
@@ -362,7 +371,8 @@ describe('usage overview model', () => {
         daily: codexDaily
       },
       opencode: { scanState: null, summary: null, daily: [] },
-      muse: { scanState: null, summary: null, daily: [] }
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.daily).toHaveLength(130_000)
