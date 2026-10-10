@@ -129,6 +129,7 @@ export type PersistedUIState = {
   _cursorStatusBarDefaultAdded?: boolean
   /** One-shot migration flag for adding the default-on ZCode status item. */
   _zcodeStatusBarDefaultAdded?: boolean
+  _ninerouterStatusBarDefaultAdded?: boolean
   statusBarItems: StatusBarItem[]
   statusBarVisible: boolean
   /** Why: this is client-side presentation, not a provider/account or execution-host setting. */

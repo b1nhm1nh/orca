@@ -102,7 +102,7 @@ export const useAppStore = create<AppState>()(
         ...createCodexUsageSlice(...a),
         ...createOpenCodeUsageSlice(...a),
         ...createMuseUsageSlice(...a),
-  ...createNineRouterUsageSlice(...a),
+        ...createNineRouterUsageSlice(...a),
         ...createBrowserSlice(...a),
         ...createRateLimitSlice(...a),
         ...createSshSlice(...a),

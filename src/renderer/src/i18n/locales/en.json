@@ -228,7 +228,8 @@
         "antigravityToggleDescription": "Show Antigravity subscription usage for the active workspace.",
         "grokToggleDescription": "Show Grok subscription credit usage when signed in via Grok CLI.",
         "cursorToggleDescription": "Show Cursor plan usage when signed in through cursor-agent or Cursor IDE.",
-        "zcodeToggleDescription": "Show ZCode Coding Plan quota usage."
+        "zcodeToggleDescription": "Show ZCode Coding Plan quota usage.",
+        "ninerouterToggleDescription": "Show quota for the models 9router routed in the last 24 hours."
       },
       "menuBarIcon": {
         "title": "Show Menu Bar Icon",
@@ -3996,7 +3997,8 @@
             "codexSignInError": "Codex sign-in failed. Please try again.",
             "cursorUsageMenu": "Cursor Usage",
             "hiddenUsageProviders": "Also: {{value0}}",
-            "zcodeUsageMenu": "ZCode Usage"
+            "zcodeUsageMenu": "ZCode Usage",
+            "ninerouterUsageMenu": "9router Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "Connect an account",
@@ -9605,6 +9607,9 @@
             "zcode": "zcode",
             "zai": "zai",
             "glm": "glm",
+            "ninerouterUsageTitle": "9router Usage",
+            "ninerouterUsageDescription": "Show quota for the models the local 9router gateway is routing in the status bar.",
+            "ninerouter": "9router",
             "tray": {
               "tray": "tray",
               "system": "system tray",

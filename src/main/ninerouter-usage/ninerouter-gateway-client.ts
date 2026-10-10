@@ -57,7 +57,7 @@ function describeFetchError(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-async function fetchGatewayJson<T>(
+export async function fetchGatewayJson<T>(
   path: string,
   cliToken: string,
   schema: z.ZodType<T>
@@ -95,6 +95,7 @@ export function createNineRouterGatewayClient(cliToken: string): NineRouterGatew
   return {
     fetchStats: (period) =>
       fetchGatewayJson(`/api/usage/stats?period=${period}`, cliToken, usageStatsSchema),
-    fetchDailyChart: () => fetchGatewayJson('/api/usage/chart?period=60d', cliToken, usageChartSchema)
+    fetchDailyChart: () =>
+      fetchGatewayJson('/api/usage/chart?period=60d', cliToken, usageChartSchema)
   }
 }

@@ -1,4 +1,4 @@
-import { Activity, Plug, Server } from 'lucide-react'
+import { Activity, Plug, Route, Server } from 'lucide-react'
 import React from 'react'
 import {
   DropdownMenu,
@@ -154,6 +154,16 @@ export function StatusBarVisibilityMenu({
         >
           <AgentIcon agent="cursor" size={14} />
           {translate('auto.components.status.bar.StatusBar.cursorUsageMenu', 'Cursor Usage')}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={statusBarItems.includes('ninerouter')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('usage-tracking')
+            toggleStatusBarItem('ninerouter')
+          }}
+        >
+          <Route size={14} />
+          {translate('auto.components.status.bar.StatusBar.ninerouterUsageMenu', '9router Usage')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={statusBarItems.includes('ssh')}

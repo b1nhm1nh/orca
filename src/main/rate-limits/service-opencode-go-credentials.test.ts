@@ -33,6 +33,17 @@ vi.mock('./kimi-fetcher', () => ({
 
 vi.mock('./cursor-fetcher', () => ({ fetchCursorRateLimits: vi.fn() }))
 vi.mock('./cursor-auth', () => ({ readCursorAuthSession: vi.fn() }))
+vi.mock('./ninerouter-model-quota-fetcher', () => ({
+  fetchNineRouterRateLimits: vi.fn(async () => ({
+    provider: 'ninerouter',
+    session: null,
+    weekly: null,
+    updatedAt: Date.now(),
+    error: null,
+    status: 'unavailable'
+  }))
+}))
+
 vi.mock('./zcode-usage-fetcher', () => ({ fetchZcodeRateLimits: vi.fn() }))
 vi.mock('./antigravity-usage-fetcher', () => ({ fetchAntigravityRateLimits: vi.fn() }))
 
