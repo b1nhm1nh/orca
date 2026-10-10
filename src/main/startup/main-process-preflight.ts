@@ -84,6 +84,7 @@ import { initClaudeUsagePath } from '../claude-usage/store'
 import { initCodexUsagePath } from '../codex-usage/store'
 import { initOpenCodeUsagePath } from '../opencode-usage/store'
 import { initMuseUsagePath } from '../muse-usage/store'
+import { initNinerouterUsagePath } from '../ninerouter-usage/store'
 import { registerDocPreviewSchemePrivileges } from '../browser/doc-preview-protocol'
 import { MEDIA_PREVIEW_CUSTOM_SCHEME } from '../media/media-preview-protocol'
 import { JIRA_IMAGE_CUSTOM_SCHEME } from '../jira/attachment-image-protocol'
@@ -358,6 +359,7 @@ function initializeMainProcessPreflight(options: MainProcessPreflightOptions): b
   initCodexUsagePath()
   initOpenCodeUsagePath()
   initMuseUsagePath()
+  initNinerouterUsagePath()
   // Why: Electron freezes the privileged scheme table at ready, so the doc-preview
   // scheme must be declared here or its webview loses fetch/secure-origin privileges.
   registerDocPreviewSchemePrivileges([MEDIA_PREVIEW_CUSTOM_SCHEME, JIRA_IMAGE_CUSTOM_SCHEME])

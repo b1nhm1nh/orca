@@ -541,6 +541,7 @@ describe('registerCoreHandlers', () => {
       openCodeUsage as never,
       // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: registration only forwards this marker to the mocked usage registrar.
       museUsage as never,
+      museUsage as never,
       codexAccounts as never,
       claudeAccounts as never,
       rateLimits as never,
@@ -774,6 +775,7 @@ describe('registerCoreHandlers', () => {
       codexUsage2 as never,
       openCodeUsage2 as never,
       // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: registration only forwards this marker to the mocked usage registrar.
+      museUsage2 as never,
       museUsage2 as never,
       codexAccounts2 as never,
       claudeAccounts2 as never,
