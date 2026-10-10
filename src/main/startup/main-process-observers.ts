@@ -20,6 +20,7 @@ import { ClaudeUsageStore } from '../claude-usage/store'
 import { CodexUsageStore } from '../codex-usage/store'
 import { OpenCodeUsageStore } from '../opencode-usage/store'
 import { MuseUsageStore } from '../muse-usage/store'
+import { NineRouterUsageStore } from '../ninerouter-usage/store'
 import { installRepoMaintenanceIdleGate } from '../repo-maintenance-idle-gate'
 import { mainProcessState as state } from './main-process-state'
 
@@ -135,4 +136,5 @@ export function initializeMainProcessObservers(): void {
   state.codexUsage = new CodexUsageStore(store)
   state.openCodeUsage = new OpenCodeUsageStore(store)
   state.museUsage = new MuseUsageStore(store)
+  state.nineRouterUsage = new NineRouterUsageStore(store)
 }

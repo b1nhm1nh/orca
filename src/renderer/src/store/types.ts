@@ -19,6 +19,7 @@ import type {
   ClaudeUsageSlice,
   CodexUsageSlice,
   MuseUsageSlice,
+  NineRouterUsageSlice,
   OpenCodeUsageSlice
 } from './slices/usage-provider-slices'
 import type { BrowserSlice } from './slices/browser'
@@ -68,6 +69,7 @@ export type AppState = RepoSlice &
   CodexUsageSlice &
   OpenCodeUsageSlice &
   MuseUsageSlice &
+  NineRouterUsageSlice &
   BrowserSlice &
   RateLimitSlice &
   SshSlice &

@@ -21,6 +21,7 @@ import {
   createClaudeUsageSlice,
   createCodexUsageSlice,
   createMuseUsageSlice,
+  createNineRouterUsageSlice,
   createOpenCodeUsageSlice
 } from './slices/usage-provider-slices'
 import { createBrowserSlice } from './slices/browser'
@@ -101,6 +102,7 @@ export const useAppStore = create<AppState>()(
         ...createCodexUsageSlice(...a),
         ...createOpenCodeUsageSlice(...a),
         ...createMuseUsageSlice(...a),
+  ...createNineRouterUsageSlice(...a),
         ...createBrowserSlice(...a),
         ...createRateLimitSlice(...a),
         ...createSshSlice(...a),

@@ -149,3 +149,34 @@ export function createMuseProvider(input: UsageOverviewInput['muse']): UsageProv
     activeDays: countActiveDays(dailyActiveDays)
   }
 }
+
+export function createNineRouterProvider(
+  input: UsageOverviewInput['ninerouter']
+): UsageProviderOverview {
+  const summary = input.summary
+  const dailyActiveDays = input.daily
+    .filter((entry) => entry.totalTokens > 0)
+    .map((entry) => entry.day)
+  return {
+    id: 'ninerouter',
+    label: '9router',
+    enabled: input.scanState?.enabled ?? false,
+    isScanning: input.scanState?.isScanning ?? false,
+    hasData: summary?.hasAnyNinerouterData ?? input.scanState?.hasAnyNinerouterData ?? false,
+    lastScanCompletedAt: input.scanState?.lastScanCompletedAt ?? null,
+    lastScanError: input.scanState?.lastScanError ?? null,
+    sessions: summary?.sessions ?? 0,
+    activityLabel: 'events',
+    activityCount: summary?.events ?? 0,
+    totalTokens: summary?.totalTokens ?? 0,
+    newInputTokens: summary?.inputTokens ?? 0,
+    outputTokens: summary?.outputTokens ?? 0,
+    cacheTokens: summary?.cachedInputTokens ?? 0,
+    reasoningTokens: summary?.reasoningOutputTokens ?? 0,
+    estimatedCostUsd: summary && summary.totalTokens > 0 ? summary.costUsd : null,
+    hasPartialCost: (summary?.totalTokens ?? 0) > (summary?.inputTokens ?? 0) + (summary?.outputTokens ?? 0),
+    topModel: summary?.topModel ?? null,
+    topProject: null,
+    activeDays: countActiveDays(dailyActiveDays)
+  }
+}
