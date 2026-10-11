@@ -182,6 +182,11 @@ export function initializeMainProcessAccountServices(): void {
   state.rateLimits.setAntigravityUsageEnabledResolver(() =>
     store.getUI().statusBarItems.includes('antigravity')
   )
+  const nineRouterUsage = state.nineRouterUsage
+  state.rateLimits.setNineRouterUsageEnabledResolver(
+    () =>
+      nineRouterUsage.getScanState().enabled && store.getUI().statusBarItems.includes('ninerouter')
+  )
   state.rateLimits.setNetworkProxySettingsResolver(() => store.getSettings())
   state.keybindings = new KeybindingService({
     homePath: app.getPath('home'),

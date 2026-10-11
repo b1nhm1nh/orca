@@ -28,19 +28,21 @@ export function buildUsageOverview(input: UsageOverviewInput): UsageOverviewMode
           (best, entry) => (!best || entry.totalTokens > best.totalTokens ? entry : best),
           null
         )
-  const totalTokens = providers.reduce((sum, provider) => sum + provider.totalTokens, 0)
-  const newInputTokens = providers.reduce((sum, provider) => sum + provider.newInputTokens, 0)
-  const outputTokens = providers.reduce((sum, provider) => sum + provider.outputTokens, 0)
-  const cacheTokens = providers.reduce((sum, provider) => sum + provider.cacheTokens, 0)
-  const reasoningTokens = providers.reduce((sum, provider) => sum + provider.reasoningTokens, 0)
-  const sessions = providers.reduce((sum, provider) => sum + provider.sessions, 0)
-  const activityCount = providers.reduce((sum, provider) => sum + provider.activityCount, 0)
-  const knownCost = providers.reduce((sum, provider) => sum + (provider.estimatedCostUsd ?? 0), 0)
-  const hasKnownCost = providers.some((provider) => provider.estimatedCostUsd !== null)
+  // Why: 9router routes the same agent traffic the transcript scans already count; summing it would double the totals.
+  const counted = providers.filter((provider) => provider.id !== 'ninerouter')
+  const totalTokens = counted.reduce((sum, provider) => sum + provider.totalTokens, 0)
+  const newInputTokens = counted.reduce((sum, provider) => sum + provider.newInputTokens, 0)
+  const outputTokens = counted.reduce((sum, provider) => sum + provider.outputTokens, 0)
+  const cacheTokens = counted.reduce((sum, provider) => sum + provider.cacheTokens, 0)
+  const reasoningTokens = counted.reduce((sum, provider) => sum + provider.reasoningTokens, 0)
+  const sessions = counted.reduce((sum, provider) => sum + provider.sessions, 0)
+  const activityCount = counted.reduce((sum, provider) => sum + provider.activityCount, 0)
+  const knownCost = counted.reduce((sum, provider) => sum + (provider.estimatedCostUsd ?? 0), 0)
+  const hasKnownCost = counted.some((provider) => provider.estimatedCostUsd !== null)
   // Why: with no priced provider the total already reads n/a; "some prices unavailable" would mislead.
   const hasPartialCost =
     hasKnownCost &&
-    providers.some(
+    counted.some(
       (provider) =>
         provider.hasPartialCost || (provider.hasData && provider.estimatedCostUsd === null)
     )

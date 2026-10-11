@@ -1,13 +1,15 @@
 import type {
+  NineRouterUsageBreakdownRow,
+  NineRouterUsageDailyPoint,
   NineRouterUsageRange,
   NineRouterUsageScope,
-  NineRouterUsageSnapshot
+  NineRouterUsageSessionRow,
+  NineRouterUsageSnapshot,
+  NineRouterUsageSummary
 } from '../../shared/ninerouter-usage-types'
 import { highestUsageKey } from '../usage/highest-usage-key'
-import type {
-  NineRouterUsageDailyAggregate,
-  NineRouterUsageSession
-} from './types'
+import { parseNineRouterSessionId } from './ninerouter-usage-scan'
+import type { NineRouterUsageDailyAggregate, NineRouterUsageSession } from './types'
 
 const RANGE_DAYS: Record<Exclude<NineRouterUsageRange, 'all'>, number> = {
   '7d': 7,
@@ -16,7 +18,10 @@ const RANGE_DAYS: Record<Exclude<NineRouterUsageRange, 'all'>, number> = {
 }
 
 /** Local-day cutoff like `usage-calendar-range`, but with 9router's 60d range. */
-export function getNineRouterRangeCutoff(range: NineRouterUsageRange, now = new Date()): string | null {
+export function getNineRouterRangeCutoff(
+  range: NineRouterUsageRange,
+  now = new Date()
+): string | null {
   if (range === 'all') {
     return null
   }
@@ -38,54 +43,44 @@ function filterDaily(
   return daily.filter((entry) => !cutoff || entry.day >= cutoff)
 }
 
-function filterSessions(
+// Why: each session is one model's total for one 9router stats period, so a range reads its own period.
+function sessionsForRange(
   sessions: NineRouterUsageSession[],
-  range: NineRouterUsageRange,
-  now: Date
+  range: NineRouterUsageRange
 ): NineRouterUsageSession[] {
-  const cutoff = getNineRouterRangeCutoff(range, now)
-  if (!cutoff) {
-    return sessions
-  }
-  const cutoffStart = new Date(`${cutoff}T00:00:00`).getTime()
-  return sessions.filter((session) => new Date(session.lastTimestamp).getTime() >= cutoffStart)
+  return sessions.filter((session) => parseNineRouterSessionId(session.sessionId)?.range === range)
 }
 
+// Totals come from 9router's own per-period stats, which split input/output/cache; the chart only has totals.
 export function buildNineRouterUsageSummary(
   scope: NineRouterUsageScope,
   range: NineRouterUsageRange,
   daily: NineRouterUsageDailyAggregate[],
-  sessions: NineRouterUsageSession[],
-  now = new Date()
-) {
-  const filteredDaily = filterDaily(daily, range, now)
-  const filteredSessions = filterSessions(sessions, range, now)
+  sessions: NineRouterUsageSession[]
+): NineRouterUsageSummary {
+  const rangeSessions = sessionsForRange(sessions, range)
+  let events = 0
   let inputTokens = 0
   let cachedInputTokens = 0
   let outputTokens = 0
   let totalTokens = 0
   let costUsd = 0
-  let activeDays = 0
   const byModel = new Map<string, number>()
-  for (const row of filteredDaily) {
-    inputTokens += row.inputTokens
-    cachedInputTokens += row.cachedInputTokens
-    outputTokens += row.outputTokens
-    totalTokens += row.totalTokens
-    costUsd += row.costUsd
-    if (row.totalTokens > 0) {
-      activeDays += 1
-    }
-  }
-  for (const session of filteredSessions) {
+  for (const session of rangeSessions) {
+    events += session.eventCount
+    inputTokens += session.totalInputTokens
+    cachedInputTokens += session.totalCachedInputTokens
+    outputTokens += session.totalOutputTokens
+    totalTokens += session.totalTokens
+    costUsd += session.costUsd
     const model = session.primaryModel ?? 'Unknown model'
     byModel.set(model, (byModel.get(model) ?? 0) + session.totalTokens)
   }
   return {
     scope,
     range,
-    sessions: filteredSessions.length,
-    events: filteredSessions.reduce((sum, session) => sum + session.eventCount, 0),
+    sessions: rangeSessions.length,
+    events,
     inputTokens,
     cachedInputTokens,
     outputTokens,
@@ -101,8 +96,8 @@ export function buildNineRouterUsageDailyPoints(
   daily: NineRouterUsageDailyAggregate[],
   range: NineRouterUsageRange,
   now = new Date()
-) {
-  const byDay = new Map<string, { day: string; totalTokens: number; costUsd: number }>()
+): NineRouterUsageDailyPoint[] {
+  const byDay = new Map<string, NineRouterUsageDailyPoint>()
   for (const row of filterDaily(daily, range, now)) {
     const existing = byDay.get(row.day) ?? { day: row.day, totalTokens: 0, costUsd: 0 }
     existing.totalTokens += row.totalTokens
@@ -114,18 +109,18 @@ export function buildNineRouterUsageDailyPoints(
 
 export function buildNineRouterUsageBreakdownRows(
   sessions: NineRouterUsageSession[],
-  range: NineRouterUsageRange,
-  now = new Date()
-) {
-  const rows = new Map<
-    string,
-    { key: string; label: string; events: number; totalTokens: number; costUsd: number }
-  >()
-  for (const session of filterSessions(sessions, range, now)) {
+  range: NineRouterUsageRange
+): NineRouterUsageBreakdownRow[] {
+  const rows = new Map<string, NineRouterUsageBreakdownRow>()
+  for (const session of sessionsForRange(sessions, range)) {
     for (const model of session.modelBreakdown) {
-      const existing =
-        rows.get(model.modelKey) ??
-        { key: model.modelKey, label: model.modelLabel, events: 0, totalTokens: 0, costUsd: 0 }
+      const existing = rows.get(model.modelKey) ?? {
+        key: model.modelKey,
+        label: model.modelLabel,
+        events: 0,
+        totalTokens: 0,
+        costUsd: 0
+      }
       existing.events += model.eventCount
       existing.totalTokens += model.totalTokens
       existing.costUsd += model.costUsd
@@ -138,10 +133,9 @@ export function buildNineRouterUsageBreakdownRows(
 export function buildNineRouterUsageRecentSessions(
   sessions: NineRouterUsageSession[],
   range: NineRouterUsageRange,
-  limit = 10,
-  now = new Date()
-) {
-  return filterSessions(sessions, range, now)
+  limit = 10
+): NineRouterUsageSessionRow[] {
+  return sessionsForRange(sessions, range)
     .sort((left, right) => right.lastTimestamp.localeCompare(left.lastTimestamp))
     .slice(0, limit)
     .map((session) => ({
@@ -149,7 +143,7 @@ export function buildNineRouterUsageRecentSessions(
       lastActiveAt: session.lastTimestamp,
       projectLabel: session.primaryProjectLabel,
       model: session.primaryModel,
-      provider: session.sessionId.split(':')[1] ?? 'unknown',
+      provider: parseNineRouterSessionId(session.sessionId)?.provider ?? 'unknown',
       events: session.eventCount,
       inputTokens: session.totalInputTokens,
       cachedInputTokens: session.totalCachedInputTokens,
@@ -167,13 +161,12 @@ export function buildNineRouterUsageSnapshot(
   scanState: NineRouterUsageSnapshot['scanState'],
   now = new Date()
 ): NineRouterUsageSnapshot {
-  const summary = buildNineRouterUsageSummary(scope, range, daily, sessions, now)
   return {
     scanState,
-    summary,
+    summary: buildNineRouterUsageSummary(scope, range, daily, sessions),
     daily: buildNineRouterUsageDailyPoints(daily, range, now),
-    modelBreakdown: buildNineRouterUsageBreakdownRows(sessions, range, now),
+    modelBreakdown: buildNineRouterUsageBreakdownRows(sessions, range),
     projectBreakdown: [],
-    recentSessions: buildNineRouterUsageRecentSessions(sessions, range, 10, now)
+    recentSessions: buildNineRouterUsageRecentSessions(sessions, range)
   }
 }

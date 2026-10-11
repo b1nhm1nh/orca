@@ -174,7 +174,8 @@ export function createNineRouterProvider(
     cacheTokens: summary?.cachedInputTokens ?? 0,
     reasoningTokens: summary?.reasoningOutputTokens ?? 0,
     estimatedCostUsd: summary && summary.totalTokens > 0 ? summary.costUsd : null,
-    hasPartialCost: (summary?.totalTokens ?? 0) > (summary?.inputTokens ?? 0) + (summary?.outputTokens ?? 0),
+    // 9router prices every request itself, so its cost is never partial.
+    hasPartialCost: false,
     topModel: summary?.topModel ?? null,
     topProject: null,
     activeDays: countActiveDays(dailyActiveDays)

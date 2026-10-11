@@ -1,6 +1,11 @@
+import type { NineRouterUsageRange } from '../../shared/ninerouter-usage-types'
 import { describe, expect, it, vi } from 'vitest'
-import { createNineRouterGatewayClient, type NineRouterUsageChart, type NineRouterUsageStats } from './ninerouter-gateway-client'
-import { scanNineRouterUsage } from './ninerouter-usage-scan'
+import {
+  createNineRouterGatewayClient,
+  type NineRouterUsageChart,
+  type NineRouterUsageStats
+} from './ninerouter-gateway-client'
+import { parseNineRouterSessionId, scanNineRouterUsage } from './ninerouter-usage-scan'
 
 const NOW = new Date('2026-10-11T12:00:00')
 
@@ -45,9 +50,14 @@ function statsResponse() {
   }
 }
 
-function clientWith(overrides: { stats?: NineRouterUsageStats; chart?: NineRouterUsageChart } = {}) {
+function clientWith(
+  overrides: { stats?: NineRouterUsageStats; chart?: NineRouterUsageChart } = {}
+) {
   return {
-    fetchStats: vi.fn(async (): Promise<NineRouterUsageStats> => overrides.stats ?? statsResponse()),
+    fetchStats: vi.fn(
+      async (_period: NineRouterUsageRange): Promise<NineRouterUsageStats> =>
+        overrides.stats ?? statsResponse()
+    ),
     fetchDailyChart: vi.fn(
       async (): Promise<NineRouterUsageChart> =>
         overrides.chart ?? [
@@ -60,23 +70,41 @@ function clientWith(overrides: { stats?: NineRouterUsageStats; chart?: NineRoute
 }
 
 describe('ninerouter usage scan', () => {
-  it('builds one session per model and daily rows from chart buckets', async () => {
+  it('builds one session per model per stats period and daily rows from chart buckets', async () => {
     const client = clientWith()
     const { sessions, dailyAggregates } = await scanNineRouterUsage(client, NOW)
 
-    expect(client.fetchStats).toHaveBeenCalledWith('all')
-    expect(sessions).toHaveLength(2)
-    const claude = sessions.find((session) => session.primaryModel === 'claude-sonnet-5')
+    expect(client.fetchStats.mock.calls.map(([period]) => period)).toEqual([
+      '7d',
+      '30d',
+      '60d',
+      'all'
+    ])
+    expect(sessions).toHaveLength(8)
+    const claude = sessions.find(
+      (session) => session.sessionId === 'ninerouter:7d:claude:claude-sonnet-5'
+    )
     expect(claude).toMatchObject({
-      sessionId: 'ninerouter:claude:claude-sonnet-5',
+      primaryModel: 'claude-sonnet-5',
       eventCount: 8,
       totalInputTokens: 700,
+      totalCachedInputTokens: 30,
       totalOutputTokens: 80,
       totalTokens: 780,
       costUsd: 1.2,
       primaryWorktreeId: null
     })
-    const fallbackKey = sessions.find((session) => session.sessionId === 'ninerouter:zcode:glm-5.3 (zcode)')
+    expect(claude?.modelBreakdown[0]).toMatchObject({
+      modelKey: 'claude-sonnet-5',
+      totalTokens: 780
+    })
+    expect(parseNineRouterSessionId('ninerouter:all:zcode:glm-5.3 (zcode)')).toEqual({
+      range: 'all',
+      provider: 'zcode'
+    })
+    const fallbackKey = sessions.find(
+      (session) => session.sessionId === 'ninerouter:all:zcode:glm-5.3 (zcode)'
+    )
     expect(fallbackKey?.primaryModel).toBe('glm-5.3 (zcode)')
     expect(fallbackKey?.lastTimestamp).toBe(NOW.toISOString())
 
@@ -156,7 +184,10 @@ describe('ninerouter gateway client', () => {
   })
 
   it('rejects a response with an unexpected shape', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('{"byModel": 5}', { status: 200 })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('{"byModel": 5}', { status: 200 }))
+    )
     try {
       const client = createNineRouterGatewayClient('token123')
       await expect(client.fetchStats('7d')).rejects.toThrow('unexpected shape')

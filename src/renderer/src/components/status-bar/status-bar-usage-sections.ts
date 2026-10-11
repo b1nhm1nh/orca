@@ -13,6 +13,8 @@ export type StatusBarUsageSection = {
 }
 
 const STATUS_BAR_BUCKET_NAMES = new Set(['Flash', 'Pro', '1.5 Pro'])
+// Why: 9router can route many models; the inline chip keeps the most recent few and the popover lists all.
+const NINEROUTER_STATUS_BAR_BUCKET_LIMIT = 3
 
 /** The percentages actually shown in a provider chip, also used by the row's unit label. */
 export function getStatusBarUsageSections(
@@ -28,13 +30,15 @@ export function getStatusBarUsageSections(
   }
   if (p.buckets?.length) {
     // Antigravity pool names vary by account tier and 9router buckets are model ids; Gemini's experimental pools stay hidden.
-    const buckets = p.buckets.filter(
-      (bucket) =>
-        p.provider === 'antigravity' ||
-        p.provider === 'ninerouter' ||
-        STATUS_BAR_BUCKET_NAMES.has(bucket.name) ||
-        isCursorUsageBucket(bucket.name)
-    )
+    const buckets =
+      p.provider === 'ninerouter'
+        ? p.buckets.slice(0, NINEROUTER_STATUS_BAR_BUCKET_LIMIT)
+        : p.buckets.filter(
+            (bucket) =>
+              p.provider === 'antigravity' ||
+              STATUS_BAR_BUCKET_NAMES.has(bucket.name) ||
+              isCursorUsageBucket(bucket.name)
+          )
     if (buckets.length > 0) {
       return buckets.map((bucket) => ({
         key: bucket.name,

@@ -8,7 +8,7 @@ describe('ninerouter usage persisted state', () => {
   it('defaults to disabled with no data', () => {
     const state = getDefaultNinerouterUsageState()
     expect(state).toMatchObject({
-      schemaVersion: 1,
+      schemaVersion: 2,
       sources: [],
       sessions: [],
       dailyAggregates: [],
@@ -29,7 +29,7 @@ describe('ninerouter usage persisted state', () => {
         lastScanError: null
       }
     })
-    expect(migrated.schemaVersion).toBe(1)
+    expect(migrated.schemaVersion).toBe(2)
     expect(migrated.sessions).toEqual([])
     expect(migrated.scanState.enabled).toBe(true)
   })

@@ -181,7 +181,6 @@ describe('usage overview model', () => {
       codexTokens: 2_000,
       openCodeTokens: 0,
       museTokens: 0,
-      nineRouterTokens: 0,
       intensity: 4
     })
     expect(overview.providers.find((provider) => provider.id === 'codex')).toMatchObject({
@@ -282,6 +281,52 @@ describe('usage overview model', () => {
     expect(overview.hasPartialCost).toBe(false)
   })
 
+  it('lists 9router as its own row without adding it to the overview totals', () => {
+    const overview = buildUsageOverview({
+      claude: { scanState: null, summary: null, daily: [] },
+      codex: { scanState: null, summary: null, daily: [] },
+      opencode: { scanState: null, summary: null, daily: [] },
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: {
+        scanState: {
+          enabled: true,
+          isScanning: false,
+          lastScanStartedAt: 1,
+          lastScanCompletedAt: 2,
+          lastScanError: null,
+          hasAnyNinerouterData: true
+        },
+        summary: {
+          scope: 'all',
+          range: '30d',
+          sessions: 3,
+          events: 40,
+          inputTokens: 9_000,
+          cachedInputTokens: 8_000,
+          outputTokens: 500,
+          reasoningOutputTokens: 0,
+          totalTokens: 9_500,
+          costUsd: 4.2,
+          topModel: 'claude-opus-5-5',
+          hasAnyNinerouterData: true
+        },
+        daily: [{ day: '2026-09-22', totalTokens: 9_500, costUsd: 4.2 }]
+      }
+    })
+
+    expect(overview.providers.find((provider) => provider.id === 'ninerouter')).toMatchObject({
+      totalTokens: 9_500,
+      estimatedCostUsd: 4.2,
+      hasPartialCost: false,
+      activeDays: 1
+    })
+    // 9router routes traffic the transcript scans already count, so totals leave it out.
+    expect(overview.totalTokens).toBe(0)
+    expect(overview.estimatedCostUsd).toBeNull()
+    expect(overview.hasPartialCost).toBe(false)
+    expect(overview.daily).toEqual([])
+  })
+
   it('pads recent usage days with zero-token cells', () => {
     const recent = getRecentUsageDays(
       [
@@ -292,7 +337,6 @@ describe('usage overview model', () => {
           codexTokens: 2_000,
           openCodeTokens: 0,
           museTokens: 0,
-          nineRouterTokens: 0,
           intensity: 4
         }
       ],
@@ -308,7 +352,6 @@ describe('usage overview model', () => {
         codexTokens: 0,
         openCodeTokens: 0,
         museTokens: 0,
-        nineRouterTokens: 0,
         intensity: 0
       },
       {
@@ -318,7 +361,6 @@ describe('usage overview model', () => {
         codexTokens: 2_000,
         openCodeTokens: 0,
         museTokens: 0,
-        nineRouterTokens: 0,
         intensity: 4
       },
       {
@@ -328,7 +370,6 @@ describe('usage overview model', () => {
         codexTokens: 0,
         openCodeTokens: 0,
         museTokens: 0,
-        nineRouterTokens: 0,
         intensity: 0
       }
     ])
