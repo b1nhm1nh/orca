@@ -7,7 +7,9 @@ import {
 } from '../ninerouter-usage/ninerouter-cli-token'
 import {
   fetchGatewayJson,
-  NINEROUTER_UNREACHABLE_MESSAGE
+  NINEROUTER_UNREACHABLE_MESSAGE,
+  nineRouterConnectionsSchema,
+  type NineRouterConnection
 } from '../ninerouter-usage/ninerouter-gateway-client'
 
 const MODEL_ACTIVITY_PERIOD = '24h'
@@ -26,20 +28,6 @@ const accountUsageSchema = z.object({
   )
 })
 
-// Locks live in dynamic `modelLock_<model>` keys, so keep unknown keys.
-const connectionsSchema = z.object({
-  connections: z.array(
-    z
-      .object({
-        id: z.string(),
-        provider: z.string().default(''),
-        isActive: z.boolean().default(true),
-        rateLimitedUntil: z.string().nullable().optional()
-      })
-      .passthrough()
-  )
-})
-
 const quotaSchema = z.object({
   used: z.number().optional(),
   total: z.number().optional(),
@@ -52,7 +40,7 @@ const connectionQuotaSchema = z.object({
   quotas: z.record(z.string(), quotaSchema).optional()
 })
 
-type Connection = z.infer<typeof connectionsSchema>['connections'][number]
+type Connection = NineRouterConnection
 type Quota = z.infer<typeof quotaSchema>
 type ModelUse = { model: string; lastUsedMs: number; connectionIds: Set<string> }
 type QuotaReading = { usedPercent: number; resetsAt: number | null; windowMinutes: number }
@@ -316,7 +304,7 @@ export async function fetchNineRouterRateLimits(options?: {
         cliToken,
         accountUsageSchema
       ),
-      fetchGatewayJson('/api/providers', cliToken, connectionsSchema)
+      fetchGatewayJson('/api/providers', cliToken, nineRouterConnectionsSchema)
     ])
     const models = collectModelsInUse(usage.byAccount)
     const connectionIds = pickConnectionsToRead(models, MAX_CONNECTIONS_PER_POLL)

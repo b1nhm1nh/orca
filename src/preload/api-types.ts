@@ -5,6 +5,7 @@ import type {
   CursorAccountsApi,
   GrokAccountsApi,
   MinimaxCredentialsApi,
+  NineRouterAccountsApi,
   ZcodePlanCredentialsApi
 } from './api/agent-account-api'
 import type { HooksApi } from './api/agent-hook-api'
@@ -152,6 +153,7 @@ export type PreloadApi = {
   zcodePlanCredentials: ZcodePlanCredentialsApi
   grokAccounts: GrokAccountsApi
   cursorAccounts: CursorAccountsApi
+  nineRouterAccounts: NineRouterAccountsApi
   ssh: SshApi
   automations: AutomationsApi
   wsl: RuntimeApi['wsl']

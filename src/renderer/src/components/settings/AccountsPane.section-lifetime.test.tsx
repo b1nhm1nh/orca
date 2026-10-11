@@ -54,6 +54,11 @@ vi.mock('@/store', () => ({
       runtimeEnvironments: [],
       refreshRateLimits: fake.cursorRefresh,
       refreshGrokRateLimits: fake.refresh,
+      nineRouterUsageScanState: { enabled: false },
+      fetchNineRouterUsage: fake.write,
+      setNineRouterUsageEnabled: fake.write,
+      statusBarItems: [],
+      toggleStatusBarItem: fake.write,
       recordFeatureInteraction: fake.write,
       fetchSettings: fake.write
     })
@@ -108,6 +113,14 @@ beforeEach(() => {
       },
       codexAccounts: { getPendingLoginUrl: fake.pending, onPendingLoginUrlChanged: fake.subscribe },
       cursorAccounts: { getStatus: fake.cursorStatus },
+      nineRouterAccounts: {
+        getStatus: vi.fn(async () => ({
+          installed: false,
+          reachable: false,
+          connections: [],
+          error: null
+        }))
+      },
       grokAccounts: { getStatus: fake.status }
     }
   })

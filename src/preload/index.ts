@@ -77,6 +77,7 @@ import { minimaxCredentialsApi } from './api/minimax-credentials-bridge'
 import { zcodePlanCredentialsApi } from './api/zcode-plan-credentials-bridge'
 import { grokAccountsApi } from './api/grok-accounts-bridge'
 import { cursorAccountsApi } from './api/cursor-accounts-bridge'
+import { nineRouterAccountsApi } from './api/ninerouter-accounts-bridge'
 import { sshApi } from './api/ssh-bridge'
 import { automationsApi } from './api/automations-bridge'
 import { e2eApi } from './api/e2e-bridge'
@@ -177,6 +178,7 @@ const api = {
   zcodePlanCredentials: zcodePlanCredentialsApi,
   grokAccounts: grokAccountsApi,
   cursorAccounts: cursorAccountsApi,
+  nineRouterAccounts: nineRouterAccountsApi,
   ssh: sshApi,
   automations: automationsApi,
   e2e: e2eApi,

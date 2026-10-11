@@ -4493,7 +4493,8 @@
           "rangeLast7Days": "Last 7 days",
           "rangeLast30Days": "Last 30 days",
           "rangeLast90Days": "Last 90 days",
-          "rangeAllTime": "All time"
+          "rangeAllTime": "All time",
+          "0eaf937335": "Est. cost"
         },
         "ShareUsageButton": {
           "7d6b25323d": "Share on X",
@@ -4528,7 +4529,8 @@
           "eb6a066185": "claude",
           "eee19cfade": "overview",
           "grokUsageTab": "Grok",
-          "trackingSince": "Tracking since {{value0}}"
+          "trackingSince": "Tracking since {{value0}}",
+          "nineRouterUsageTab": "9router"
         },
         "UsageOverviewPane": {
           "22ed1b7669": "sessions",
@@ -4587,7 +4589,8 @@
             "d6e9f0a1b2": "credits",
             "a3b6c7d8e9": "grok usage",
             "9f2a3b4c5d": "xai",
-            "museKeyword": "muse"
+            "museKeyword": "muse",
+            "nineRouterKeyword": "9router"
           }
         },
         "usage": {
@@ -4665,6 +4668,23 @@
           "emptyMessage": "No local Muse usage found yet for this scope.",
           "noCostNote": "Muse session logs record tokens but not cost, so no cost estimate is shown.",
           "recentSessionsDescription": "Most recent local Muse sessions in this scope."
+        },
+        "NineRouterUsageDailyChart": {
+          "subtitle": "Total tokens and cost per day as 9router reports them.",
+          "cost": "Cost"
+        },
+        "NineRouterUsageDetails": {
+          "recentSessionsDescription": "Per-model totals 9router has routed, newest first."
+        },
+        "NineRouterUsagePane": {
+          "rangeLast60Days": "Last 60 days",
+          "title": "9router Usage",
+          "enableLabel": "Enable 9router usage analytics",
+          "disabledDescription": "Reads usage and cost from the 9router gateway on this machine (127.0.0.1:20128).",
+          "optionsLabel": "9router usage options",
+          "refreshAriaLabel": "Refresh 9router usage",
+          "emptyMessage": "No 9router usage found yet for this range.",
+          "costNote": "Cost is what 9router priced at request time; zero cost with non-zero tokens means that model has no price configured."
         }
       },
       "sparse": {
@@ -9345,6 +9365,15 @@
                 "codingPlan": "coding plan",
                 "rateLimit": "rate limit"
               }
+            },
+            "ninerouter": {
+              "title": "9router",
+              "description": "Connection status, model quota and routed accounts of the local 9router gateway.",
+              "kw": {
+                "router": "router",
+                "gateway": "gateway",
+                "quota": "quota"
+              }
             }
           }
         },
@@ -12702,6 +12731,31 @@
           "unavailable": "{{value0}} (unavailable)",
           "description": "Accounts, detected agents and terminal options below are for this host.",
           "unavailableNotice": "This server is no longer saved, so nothing can be shown for it. Choose another host at the top of Settings."
+        },
+        "NineRouterAccountsSection": {
+          "resetIn": "resets in {{value0}}",
+          "state": {
+            "disabled": "Disabled",
+            "rateLimitedFor": "Rate-limited · {{value0}}",
+            "rateLimited": "Rate-limited",
+            "active": "Active"
+          },
+          "loading": "Loading…",
+          "notInstalled": "9router not found on this computer",
+          "notRunning": "9router is not running",
+          "connected": "Connected to 9router on 127.0.0.1:20128",
+          "trackingTitle": "Track 9router usage",
+          "subtitle": "Local AI gateway on this computer. Orca signs in with the token 9router keeps in its own data folder, so there is no key to paste.",
+          "notInstalledHelp": "Start 9router once on the computer running Orca so it writes its machine-id and cli-secret, then click Refresh.",
+          "refresh": "Refresh",
+          "trackingDescription": "Read usage, cost and model quota from 9router for Stats & Usage and the status bar.",
+          "trackingHelp": "Same switch as the 9router tab in Stats & Usage.",
+          "statusBarTitle": "Show in status bar",
+          "statusBarDescription": "Show quota for the models 9router routed in the last 24 hours.",
+          "quotaTitle": "Model quota",
+          "quotaDescription": "Quota used for each model, read from the account 9router would pick next.",
+          "accountsTitle": "Routed accounts",
+          "accountsDescription": "Upstream accounts 9router routes through. Manage them in the 9router dashboard."
         }
       },
       "right": {

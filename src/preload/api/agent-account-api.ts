@@ -6,6 +6,7 @@ import type {
 import type { CodexConfigSyncStatus } from '../../shared/codex-config-sync-types'
 import type { CursorAccountStatus, GrokAccountStatus } from '../../shared/rate-limit-types'
 import type { ZcodePlanCredentialsStatus } from '../../shared/zcode-plan-sites'
+import type { NineRouterGatewayStatus } from '../../shared/ninerouter-usage-types'
 
 export type CodexAccountsApi = {
   list: () => Promise<CodexRateLimitAccountsState>
@@ -71,6 +72,10 @@ export type GrokAccountsApi = {
 
 export type CursorAccountsApi = {
   getStatus: () => Promise<CursorAccountStatus>
+}
+
+export type NineRouterAccountsApi = {
+  getStatus: () => Promise<NineRouterGatewayStatus>
 }
 
 export type MinimaxCredentialsApi = {

@@ -66,6 +66,7 @@ import { registerMiniMaxCredentialsHandlers } from '../minimax-credentials'
 import { registerZcodePlanCredentialsHandlers } from '../zcode-plan-credentials'
 import { registerGrokAccountHandlers } from '../grok-accounts'
 import { registerCursorAccountHandlers } from '../cursor-accounts'
+import { registerNineRouterAccountHandlers } from '../ninerouter-accounts'
 import { registerUpdaterHandlers } from '../../window/attach-main-window-services'
 import {
   registerClipboardHandlers,
@@ -149,7 +150,13 @@ export function registerCoreHandlers(
   registerAppHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
   registerCliHandlers()
   registerPreflightHandlers()
-  registerUsageProviderHandlers({ claudeUsage, codexUsage, openCodeUsage, museUsage, nineRouterUsage })
+  registerUsageProviderHandlers({
+    claudeUsage,
+    codexUsage,
+    openCodeUsage,
+    museUsage,
+    nineRouterUsage
+  })
   registerCodexAccountHandlers(codexAccounts, () => store.getSettings())
   registerAgentHookHandlers(runtime, { getPtyIdForPaneKey })
   registerCodexConfigSyncHandlers(codexAccounts.runtimeHomeService)
@@ -159,6 +166,7 @@ export function registerCoreHandlers(
   registerZcodePlanCredentialsHandlers(rateLimits)
   registerGrokAccountHandlers()
   registerCursorAccountHandlers()
+  registerNineRouterAccountHandlers()
   registerRateLimitHandlers(rateLimits, codexAccounts)
   registerGitHubHandlers(store, stats)
   registerGitLabHandlers(store)
