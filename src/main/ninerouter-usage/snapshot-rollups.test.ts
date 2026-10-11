@@ -6,10 +6,9 @@ import {
   buildNineRouterUsageSummary,
   getNineRouterRangeCutoff
 } from './snapshot-rollups'
-import type {
-  NineRouterUsageDailyAggregate,
-  NineRouterUsageSession
-} from './types'
+import type { NineRouterUsageRange } from '../../shared/ninerouter-usage-types'
+import { buildNineRouterSessionId } from './ninerouter-usage-scan'
+import type { NineRouterUsageDailyAggregate, NineRouterUsageSession } from './types'
 
 const NOW = new Date('2026-10-11T12:00:00')
 
@@ -31,9 +30,15 @@ function dailyRow(day: string, totalTokens: number, costUsd = 0): NineRouterUsag
   }
 }
 
-function modelSession(model: string, lastUsed: string, tokens: number, costUsd: number): NineRouterUsageSession {
+function modelSession(
+  model: string,
+  lastUsed: string,
+  tokens: number,
+  costUsd: number,
+  range: NineRouterUsageRange = 'all'
+): NineRouterUsageSession {
   return {
-    sessionId: `ninerouter:claude:${model}`,
+    sessionId: buildNineRouterSessionId(range, 'claude', model),
     firstTimestamp: lastUsed,
     lastTimestamp: lastUsed,
     primaryModel: model,
@@ -74,29 +79,41 @@ describe('ninerouter usage rollups', () => {
     expect(getNineRouterRangeCutoff('all', NOW)).toBeNull()
   })
 
-  it('summarizes tokens from daily rows and activity from sessions', () => {
+  it("summarizes only the selected period's model totals, split by token kind", () => {
+    const sessions = [
+      modelSession('claude-sonnet-5', '2026-10-10T08:00:00.000Z', 380, 0.35, '7d'),
+      modelSession('claude-sonnet-5', '2026-10-10T08:00:00.000Z', 9380, 9.35, 'all'),
+      modelSession('glm-5.3', '2026-09-01T08:00:00.000Z', 9000, 9, 'all')
+    ]
     const summary = buildNineRouterUsageSummary(
       'all',
       '7d',
-      [dailyRow('2026-10-10', 400, 0.4), dailyRow('2026-09-01', 9000, 9)],
-      [modelSession('claude-sonnet-5', '2026-10-10T08:00:00.000Z', 380, 0.35)],
-      NOW
+      [dailyRow('2026-10-10', 400, 0.4)],
+      sessions
     )
-    expect(summary.totalTokens).toBe(400)
-    expect(summary.costUsd).toBeCloseTo(0.4)
-    expect(summary.sessions).toBe(1)
-    expect(summary.events).toBe(3)
-    expect(summary.topModel).toBe('claude-sonnet-5')
-    expect(summary.hasAnyNinerouterData).toBe(true)
+    expect(summary).toMatchObject({
+      sessions: 1,
+      events: 3,
+      inputTokens: 370,
+      cachedInputTokens: 5,
+      outputTokens: 10,
+      totalTokens: 380,
+      topModel: 'claude-sonnet-5',
+      hasAnyNinerouterData: true
+    })
+    expect(summary.costUsd).toBeCloseTo(0.35)
+
+    const allTime = buildNineRouterUsageSummary('all', 'all', [], sessions)
+    expect(allTime.sessions).toBe(2)
+    expect(allTime.totalTokens).toBe(18_380)
   })
 
-  it('keeps the all-time presence flag even when the range filters everything', () => {
+  it('keeps the all-time presence flag when the period has no models', () => {
     const summary = buildNineRouterUsageSummary(
       'all',
       '7d',
       [dailyRow('2026-09-01', 9000, 9)],
-      [modelSession('glm-5.3', '2026-09-01T08:00:00.000Z', 9000, 9)],
-      NOW
+      [modelSession('glm-5.3', '2026-09-01T08:00:00.000Z', 9000, 9, 'all')]
     )
     expect(summary.totalTokens).toBe(0)
     expect(summary.hasAnyNinerouterData).toBe(true)
@@ -119,12 +136,18 @@ describe('ninerouter usage rollups', () => {
       modelSession('claude-sonnet-5', '2026-10-01T08:00:00.000Z', 100, 1),
       modelSession('glm-5.3', '2026-10-11T08:00:00.000Z', 200, 2)
     ]
-    const rows = buildNineRouterUsageBreakdownRows(sessions, 'all', NOW)
+    const rows = buildNineRouterUsageBreakdownRows(sessions, 'all')
     expect(rows.map((row) => row.key)).toEqual(['glm-5.3', 'claude-sonnet-5'])
     expect(rows[0]).toMatchObject({ events: 3, totalTokens: 200, costUsd: 2 })
 
-    const recent = buildNineRouterUsageRecentSessions(sessions, 'all', 10, NOW)
+    const recent = buildNineRouterUsageRecentSessions(sessions, 'all', 10)
     expect(recent.map((row) => row.model)).toEqual(['glm-5.3', 'claude-sonnet-5'])
-    expect(recent[0]).toMatchObject({ projectLabel: '9router', inputTokens: 190, outputTokens: 10 })
+    expect(recent[0]).toMatchObject({
+      projectLabel: '9router',
+      provider: 'claude',
+      inputTokens: 190,
+      outputTokens: 10
+    })
+    expect(buildNineRouterUsageBreakdownRows(sessions, '7d')).toEqual([])
   })
 })

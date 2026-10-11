@@ -205,7 +205,8 @@ export function ProviderUsageRow({
   totalTokens: number
   onEnable: () => void
 }): React.JSX.Element {
-  const share = totalTokens > 0 ? provider.totalTokens / totalTokens : 0
+  // 9router overlaps the counted providers, so its share can pass 100%.
+  const share = totalTokens > 0 ? Math.min(provider.totalTokens / totalTokens, 1) : 0
   const status = provider.enabled
     ? provider.isScanning
       ? translate('auto.components.stats.usage.overview.sections.statusScanning', 'Scanning')

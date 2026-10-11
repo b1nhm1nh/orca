@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 export const NINEROUTER_BASE_URL = 'http://127.0.0.1:20128'
 const FETCH_TIMEOUT_MS = 8_000
+export const NINEROUTER_UNREACHABLE_MESSAGE =
+  '9router is not reachable on 127.0.0.1:20128 — start it or check the port'
 
 // 9router `usageRepo.getUsageStats`: counters per group, plus provider/model names.
 const usageCountersSchema = z.object({
@@ -51,7 +53,7 @@ function describeFetchError(error: unknown): string {
     // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: Node wraps network errors in a `{ code }` cause; only that shape is read.
     const code = (error.cause as { code?: string } | null)?.code
     if (code === 'ECONNREFUSED') {
-      return '9router is not reachable on 127.0.0.1:20128 — start it or check the port'
+      return NINEROUTER_UNREACHABLE_MESSAGE
     }
   }
   return error instanceof Error ? error.message : String(error)

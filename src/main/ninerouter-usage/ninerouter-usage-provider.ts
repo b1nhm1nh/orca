@@ -5,16 +5,17 @@ import { createNineRouterGatewayClient } from './ninerouter-gateway-client'
 import { scanNineRouterUsage } from './ninerouter-usage-scan'
 import type { NineRouterUsageDailyAggregate, NineRouterUsageSession } from './types'
 
-// v1: first gateway snapshot cache.
-export const NINEROUTER_USAGE_SCHEMA_VERSION = 1
+// v2: one session per model per stats period (v1 mixed all-time model totals into every range).
+export const NINEROUTER_USAGE_SCHEMA_VERSION = 2
 
 async function scanViaGateway(): Promise<{
   sessions: NineRouterUsageSession[]
   dailyAggregates: NineRouterUsageDailyAggregate[]
 }> {
+  const dataDir = resolveNinerouterDataDir()
   const cliToken = await deriveNinerouterCliToken({
-    machineIdFile: join(resolveNinerouterDataDir(), 'machine-id'),
-    cliSecretFile: join(resolveNinerouterDataDir(), 'auth', 'cli-secret')
+    machineIdFile: join(dataDir, 'machine-id'),
+    cliSecretFile: join(dataDir, 'auth', 'cli-secret')
   })
   return scanNineRouterUsage(createNineRouterGatewayClient(cliToken))
 }

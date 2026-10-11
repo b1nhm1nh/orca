@@ -84,6 +84,11 @@ export function initializeMainProcessAccountServices(): void {
     read: readOpenCodeGoApiKey,
     save: saveOpenCodeGoApiKey
   })
+  const nineRouterUsage = state.nineRouterUsage
+  state.rateLimits.setNineRouterUsageEnabledResolver(
+    () =>
+      nineRouterUsage.getScanState().enabled && store.getUI().statusBarItems.includes('ninerouter')
+  )
   state.keybindings = new KeybindingService({
     homePath: app.getPath('home'),
     getLegacyOverrides: () => store.getSettings().keybindings,

@@ -57,7 +57,6 @@ export type UsageOverviewDailyPoint = {
   codexTokens: number
   openCodeTokens: number
   museTokens: number
-  nineRouterTokens: number
   intensity: 0 | 1 | 2 | 3 | 4
 }
 

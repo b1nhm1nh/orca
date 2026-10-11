@@ -5,8 +5,15 @@ import { homedir, platform } from 'node:os'
 
 export const NINEROUTER_CLI_TOKEN_SALT = '9r-cli-auth'
 
-/** Mirrors 9router's `src/lib/dataDir.js`: %APPDATA%\9router on Windows, ~/.9router elsewhere. */
+/**
+ * Mirrors 9router's `src/lib/dataDir.js`: `DATA_DIR` when set (a Unix path is ignored on
+ * Windows), else %APPDATA%\9router on Windows and ~/.9router elsewhere.
+ */
 export function resolveNinerouterDataDir(): string {
+  const configured = process.env.DATA_DIR?.trim()
+  if (configured && !(platform() === 'win32' && configured.startsWith('/'))) {
+    return configured
+  }
   if (platform() === 'win32') {
     return join(process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming'), '9router')
   }
