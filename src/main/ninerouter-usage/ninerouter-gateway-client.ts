@@ -39,6 +39,24 @@ const usageChartSchema = z.array(
   })
 )
 
+// `/api/providers` strips keys and tokens; locks live in dynamic `modelLock_<model>` keys, so keep unknown keys.
+export const nineRouterConnectionsSchema = z.object({
+  connections: z.array(
+    z
+      .object({
+        id: z.string(),
+        provider: z.string().default(''),
+        name: z.string().nullable().optional(),
+        isActive: z.boolean().default(true),
+        rateLimitedUntil: z.string().nullable().optional()
+      })
+      .passthrough()
+  )
+})
+
+export type NineRouterConnection = z.infer<
+  typeof nineRouterConnectionsSchema
+>['connections'][number]
 export type NineRouterUsageStats = z.infer<typeof usageStatsSchema>
 export type NineRouterUsageChart = z.infer<typeof usageChartSchema>
 

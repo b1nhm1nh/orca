@@ -57,6 +57,24 @@ export type NineRouterUsageSessionRow = {
   costUsd: number
 }
 
+/** One upstream account 9router routes through; keys and tokens never leave 9router. */
+export type NineRouterConnectionStatus = {
+  id: string
+  provider: string
+  name: string | null
+  state: 'active' | 'rate-limited' | 'disabled'
+  /** Unix ms until the account is usable again, when rate-limited. */
+  rateLimitedUntil: number | null
+}
+
+export type NineRouterGatewayStatus = {
+  /** False when 9router's machine-id or cli-secret is missing on this machine. */
+  installed: boolean
+  reachable: boolean
+  connections: NineRouterConnectionStatus[]
+  error: string | null
+}
+
 export type NineRouterUsageSnapshot = {
   scanState: NineRouterUsageScanState
   summary: NineRouterUsageSummary

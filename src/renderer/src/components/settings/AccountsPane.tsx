@@ -25,8 +25,7 @@ import {
   getAccountsLocationSearchEntries,
   getAccountsMiniMaxSearchEntries,
   getAccountsOpencodeSearchEntries,
-  getAccountsPaneSearchEntries,
-  getAccountsZcodePlanSearchEntries
+  getAccountsPaneSearchEntries
 } from './accounts-search'
 import { getRemoteAccountsPaneScope } from './provider-account-scope'
 import { ProviderHostScopeControl } from './ProviderHostScopeControl'
@@ -44,7 +43,7 @@ import { AntigravityAccountsSection } from './AntigravityAccountsSection'
 import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
 import { runtimeTargetEnvironmentId } from '@/runtime/runtime-client-target'
 import { CursorAccountsSection } from './CursorAccountsSection'
-import { ZcodePlanAccountsSection } from './ZcodePlanAccountsSection'
+import { renderGatewayAccountsSections } from './accounts-pane-gateway-sections'
 import type {
   AccountsPaneProps,
   AccountsPaneSectionModel,
@@ -431,9 +430,7 @@ export function AccountsPane({
     matchesSettingsSearch(searchQuery, getAccountsCursorSearchEntries()) ? (
       <CursorAccountsSection key="cursor" />
     ) : null,
-    matchesSettingsSearch(searchQuery, getAccountsZcodePlanSearchEntries()) ? (
-      <ZcodePlanAccountsSection key="zcode" />
-    ) : null
+    ...renderGatewayAccountsSections(searchQuery)
   ]
 
   return (

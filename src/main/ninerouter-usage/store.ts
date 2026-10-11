@@ -4,7 +4,10 @@ import type { Store } from '../persistence'
 import { UsageProviderStoreLifecycle } from '../usage/usage-provider-store-lifecycle'
 import { splitUsageCacheFileViaWorker } from '../usage/usage-scan-worker-spawn'
 import { nineRouterUsageProvider } from './ninerouter-usage-provider'
-import { getDefaultNinerouterUsageState, normalizeNinerouterUsageState } from './persisted-state-normalization'
+import {
+  getDefaultNinerouterUsageState,
+  normalizeNinerouterUsageState
+} from './persisted-state-normalization'
 import { buildNineRouterUsageSnapshot } from './snapshot-rollups'
 import type { NineRouterUsagePersistedState } from './types'
 import type {

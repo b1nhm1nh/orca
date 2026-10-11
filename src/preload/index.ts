@@ -78,6 +78,7 @@ import { minimaxCredentialsApi } from './api/minimax-credentials-bridge'
 import { zcodePlanCredentialsApi } from './api/zcode-plan-credentials-bridge'
 import { grokAccountsApi } from './api/grok-accounts-bridge'
 import { cursorAccountsApi } from './api/cursor-accounts-bridge'
+import { nineRouterAccountsApi } from './api/ninerouter-accounts-bridge'
 import { sshApi } from './api/ssh-bridge'
 import { legacyRelayBridgeApi } from './api/legacy-relay-bridge-api'
 import { automationsApi } from './api/automations-bridge'
@@ -180,6 +181,7 @@ const api = {
   zcodePlanCredentials: zcodePlanCredentialsApi,
   grokAccounts: grokAccountsApi,
   cursorAccounts: cursorAccountsApi,
+  nineRouterAccounts: nineRouterAccountsApi,
   ssh: sshApi,
   legacyRelayBridge: legacyRelayBridgeApi,
   automations: automationsApi,

@@ -59,6 +59,7 @@ describe('web preload API composition', () => {
       'zcodePlanCredentials',
       'grokAccounts',
       'cursorAccounts',
+      'nineRouterAccounts',
       'codexAccounts',
       'claudeAccounts',
       'cli',

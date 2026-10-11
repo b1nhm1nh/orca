@@ -94,6 +94,14 @@ export function createGrokAccountsApi(): NonNullable<Partial<PreloadApi>['grokAc
   }
 }
 
+// Why: 9router is read only on the computer running Orca; a web client has no gateway to reach.
+export function createNineRouterAccountsApi(): PreloadApi['nineRouterAccounts'] {
+  return {
+    getStatus: () =>
+      Promise.resolve({ installed: false, reachable: false, connections: [], error: null })
+  }
+}
+
 // Why: select/remove await provider usage refreshes on the server; give an applied switch room.
 const ACCOUNT_MUTATION_TIMEOUT_MS = 30_000
 
