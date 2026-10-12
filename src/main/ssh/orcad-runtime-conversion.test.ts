@@ -20,12 +20,11 @@ import { SshConnectionStore } from './ssh-connection-store'
 
 const mocks = vi.hoisted(() => {
   const state: { targetStore: unknown } = { targetStore: null }
-  return { state, deploy: vi.fn(), ensureTunnel: vi.fn(), directAuthority: vi.fn() }
+  return { state, deploy: vi.fn(), ensureTunnel: vi.fn() }
 })
 vi.mock('./ssh-target-registry', () => ({
   getSshConnectionManager: () => ({}),
-  getSshTargetRegistryStore: () => mocks.state.targetStore,
-  hasRegisteredDirectSshAuthority: mocks.directAuthority
+  getSshTargetRegistryStore: () => mocks.state.targetStore
 }))
 vi.mock('./orcad-runtime-deployment', () => ({ createManagedOrcadEnvironment: mocks.deploy }))
 vi.mock('./orcad-managed-tunnel', () => ({
@@ -66,7 +65,6 @@ beforeEach(() => {
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: SshConnectionStore wraps the real test store it is given.
   mocks.state.targetStore = new SshConnectionStore(store as never)
   destination = fakeOrcadMigrationDestination()
-  mocks.directAuthority.mockReturnValue(false)
   mocks.ensureTunnel.mockResolvedValue(undefined)
   // Registers the server the fence named, as the real deploy would after pairing.
   mocks.deploy.mockImplementation(async (path: string, args: { name: string }) => {
@@ -148,7 +146,10 @@ describe('converting an SSH host into a managed server', () => {
   })
 
   it('refuses before touching the host while terminals run or cannot be counted', async () => {
-    store.upsertSshRemotePtyLease({ targetId: TARGET.id, ptyId: 'p', state: 'expired' })
+    // Saved by a relay-era build; this build only reads it.
+    vi.spyOn(store, 'getSshRemotePtyLeases').mockReturnValue([
+      { targetId: TARGET.id, ptyId: 'p', state: 'expired', createdAt: 1, updatedAt: 1 }
+    ])
     const uncounted = async () => ({ verdict: 'unverifiable' as const, count: 0 })
     await expect(convert(uncounted)).resolves.toMatchObject({
       outcome: 'refused',
