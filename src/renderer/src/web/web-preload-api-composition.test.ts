@@ -75,6 +75,7 @@ describe('web preload API composition', () => {
       'wsl',
       'pwsh',
       'gitBash',
+      'cmder',
       'agentStatus',
       'mobile',
       'telemetryTrack',
