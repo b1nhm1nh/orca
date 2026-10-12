@@ -67,6 +67,10 @@ export abstract class RateLimitServiceConfiguration extends RateLimitServiceAcco
     this.antigravityUsageEnabledResolver = resolver
   }
 
+  setNineRouterUsageEnabledResolver(resolver: () => boolean): void {
+    this.nineRouterUsageEnabledResolver = resolver
+  }
+
   setNetworkProxySettingsResolver(resolver: () => NetworkProxySettings): void {
     this.networkProxySettingsResolver = resolver
   }

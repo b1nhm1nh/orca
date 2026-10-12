@@ -5,6 +5,7 @@ import {
   createClaudeAccountsApi,
   createCodexAccountsApi,
   createCursorAccountsApi,
+  createNineRouterAccountsApi,
   createGrokAccountsApi,
   createZcodePlanCredentialsApi,
   createOpenCodeGoCredentialsApi,
@@ -40,6 +41,7 @@ import { createWebPlatformApi } from './preload-api/web-platform-api'
 import { createRateLimitsApi } from './preload-api/web-rate-limits-api'
 import { createReposApi } from './preload-api/web-repositories-api'
 import { createHooksApi, createRuntimeNamespaceApi } from './preload-api/web-review-api'
+import { createWebJiraApi } from './preload-api/web-jira-api'
 import { callRuntimeResult } from './preload-api/web-runtime-calls'
 import { createWebRuntimeApi } from './preload-api/web-runtime-api'
 import { createRuntimeEnvironmentsApi } from './preload-api/web-runtime-environments-api'
@@ -91,6 +93,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
     gl: createGitLabApi(),
     hostedReview: createRuntimeNamespaceApi('hostedReview'),
     linear: createRuntimeNamespaceApi('linear'),
+    jira: createWebJiraApi(),
     hooks: createHooksApi(),
     stats: {
       getSummary: async () =>
@@ -113,6 +116,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
     zcodePlanCredentials: createZcodePlanCredentialsApi(),
     grokAccounts: createGrokAccountsApi(),
     cursorAccounts: createCursorAccountsApi(),
+    nineRouterAccounts: createNineRouterAccountsApi(),
     codexAccounts: createCodexAccountsApi(),
     claudeAccounts: createClaudeAccountsApi(),
     cli: createCliApi(),

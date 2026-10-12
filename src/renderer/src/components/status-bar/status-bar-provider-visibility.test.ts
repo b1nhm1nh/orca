@@ -419,6 +419,29 @@ describe('isUsageEmptyState', () => {
     expect(isUsageEmptyState(createEmptyRateLimitState(), usageSettings())).toBe(false)
   })
 
+  it('skips the setup CTA when only the local 9router gateway reports quota', () => {
+    const unavailable = (id: ProviderRateLimits['provider']) =>
+      provider('unavailable', { provider: id })
+    expect(
+      isUsageEmptyState(
+        {
+          claude: unavailable('claude'),
+          codex: unavailable('codex'),
+          gemini: unavailable('gemini'),
+          opencodeGo: unavailable('opencode-go'),
+          kimi: unavailable('kimi'),
+          antigravity: unavailable('antigravity'),
+          minimax: unavailable('minimax'),
+          grok: unavailable('grok'),
+          cursor: unavailable('cursor'),
+          zcode: unavailable('zcode'),
+          ninerouter: provider('ok', { provider: 'ninerouter' })
+        },
+        usageSettings()
+      )
+    ).toBe(false)
+  })
+
   it('treats provider keys omitted by an older main process as pending', () => {
     expect(
       isUsageEmptyState(

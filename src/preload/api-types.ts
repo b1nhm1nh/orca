@@ -5,6 +5,7 @@ import type {
   CursorAccountsApi,
   GrokAccountsApi,
   MinimaxCredentialsApi,
+  NineRouterAccountsApi,
   ZcodePlanCredentialsApi
 } from './api/agent-account-api'
 import type { HooksApi } from './api/agent-hook-api'
@@ -14,6 +15,7 @@ import type {
   ClaudeUsageApi,
   CodexUsageApi,
   MuseUsageApi,
+  NineRouterUsageApi,
   OpenCodeUsageApi,
   RateLimitsApi
 } from './api/agent-usage-api'
@@ -124,7 +126,6 @@ export type PreloadApi = {
   ephemeralVm: EphemeralVmApi
   cache: WorkspaceSessionApi['cache']
   session: WorkspaceSessionApi['session']
-  remoteWorkspace: WorkspaceSessionApi['remoteWorkspace']
   updater: UpdaterApi
   notebook: FilesystemApi['notebook']
   docPreview: DocPreviewApi['docPreview']
@@ -134,6 +135,7 @@ export type PreloadApi = {
   codexUsage: CodexUsageApi
   openCodeUsage: OpenCodeUsageApi
   museUsage: MuseUsageApi
+  nineRouterUsage: NineRouterUsageApi
   aiVault: AiVaultApi
   nativeChat: NativeChatApi
   fs: FilesystemApi['fs']
@@ -151,6 +153,7 @@ export type PreloadApi = {
   zcodePlanCredentials: ZcodePlanCredentialsApi
   grokAccounts: GrokAccountsApi
   cursorAccounts: CursorAccountsApi
+  nineRouterAccounts: NineRouterAccountsApi
   ssh: SshApi
   automations: AutomationsApi
   wsl: RuntimeApi['wsl']
@@ -166,6 +169,7 @@ export type {
   ClaudeUsageApi,
   CodexUsageApi,
   MuseUsageApi,
+  NineRouterUsageApi,
   OpenCodeUsageApi
 } from './api/agent-usage-api'
 export type { AiVaultApi } from './api/ai-vault-api'

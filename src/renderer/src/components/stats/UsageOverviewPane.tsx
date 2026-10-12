@@ -39,10 +39,15 @@ export function UsageOverviewPane(): React.JSX.Element {
   const museScanState = useAppStore((state) => state.museUsageScanState)
   const museSummary = useAppStore((state) => state.museUsageSummary)
   const museDaily = useAppStore((state) => state.museUsageDaily)
+  const nineRouterScanState = useAppStore((state) => state.nineRouterUsageScanState)
+  const nineRouterSummary = useAppStore((state) => state.nineRouterUsageSummary)
+  const nineRouterDaily = useAppStore((state) => state.nineRouterUsageDaily)
   const fetchClaudeUsage = useAppStore((state) => state.fetchClaudeUsage)
   const fetchCodexUsage = useAppStore((state) => state.fetchCodexUsage)
   const fetchOpenCodeUsage = useAppStore((state) => state.fetchOpenCodeUsage)
   const fetchMuseUsage = useAppStore((state) => state.fetchMuseUsage)
+  const fetchNineRouterUsage = useAppStore((state) => state.fetchNineRouterUsage)
+  const refreshNineRouterUsage = useAppStore((state) => state.refreshNineRouterUsage)
   const refreshClaudeUsage = useAppStore((state) => state.refreshClaudeUsage)
   const refreshCodexUsage = useAppStore((state) => state.refreshCodexUsage)
   const refreshOpenCodeUsage = useAppStore((state) => state.refreshOpenCodeUsage)
@@ -58,7 +63,14 @@ export function UsageOverviewPane(): React.JSX.Element {
     void fetchCodexUsage()
     void fetchOpenCodeUsage()
     void fetchMuseUsage()
-  }, [fetchClaudeUsage, fetchCodexUsage, fetchOpenCodeUsage, fetchMuseUsage])
+    void fetchNineRouterUsage()
+  }, [
+    fetchClaudeUsage,
+    fetchCodexUsage,
+    fetchOpenCodeUsage,
+    fetchMuseUsage,
+    fetchNineRouterUsage
+  ])
 
   const overview = useMemo(
     () =>
@@ -82,6 +94,11 @@ export function UsageOverviewPane(): React.JSX.Element {
           scanState: museScanState,
           summary: museSummary,
           daily: museDaily
+        },
+        ninerouter: {
+          scanState: nineRouterScanState,
+          summary: nineRouterSummary,
+          daily: nineRouterDaily
         }
       }),
     [
@@ -94,6 +111,9 @@ export function UsageOverviewPane(): React.JSX.Element {
       museDaily,
       museScanState,
       museSummary,
+      nineRouterDaily,
+      nineRouterScanState,
+      nineRouterSummary,
       openCodeDaily,
       openCodeScanState,
       openCodeSummary
@@ -110,7 +130,8 @@ export function UsageOverviewPane(): React.JSX.Element {
       claudeScanState?.enabled ? refreshClaudeUsage() : Promise.resolve(),
       codexScanState?.enabled ? refreshCodexUsage() : Promise.resolve(),
       openCodeScanState?.enabled ? refreshOpenCodeUsage() : Promise.resolve(),
-      museScanState?.enabled ? refreshMuseUsage() : Promise.resolve()
+      museScanState?.enabled ? refreshMuseUsage() : Promise.resolve(),
+      nineRouterScanState?.enabled ? refreshNineRouterUsage() : Promise.resolve()
     ])
   }
 

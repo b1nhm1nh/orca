@@ -18,8 +18,13 @@ import type {
   MuseUsageScanState,
   MuseUsageSummary
 } from '../../../../shared/muse-usage-types'
+import type {
+  NineRouterUsageDailyPoint,
+  NineRouterUsageScanState,
+  NineRouterUsageSummary
+} from '../../../../shared/ninerouter-usage-types'
 
-export type UsageProviderId = 'claude' | 'codex' | 'opencode' | 'muse'
+export type UsageProviderId = 'claude' | 'codex' | 'opencode' | 'muse' | 'ninerouter'
 
 export type UsageProviderOverview = {
   id: UsageProviderId
@@ -97,5 +102,10 @@ export type UsageOverviewInput = {
     scanState: MuseUsageScanState | null
     summary: MuseUsageSummary | null
     daily: MuseUsageDailyPoint[]
+  }
+  ninerouter: {
+    scanState: NineRouterUsageScanState | null
+    summary: NineRouterUsageSummary | null
+    daily: NineRouterUsageDailyPoint[]
   }
 }

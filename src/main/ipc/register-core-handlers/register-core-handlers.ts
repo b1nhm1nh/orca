@@ -66,6 +66,7 @@ import { registerMiniMaxCredentialsHandlers } from '../minimax-credentials'
 import { registerZcodePlanCredentialsHandlers } from '../zcode-plan-credentials'
 import { registerGrokAccountHandlers } from '../grok-accounts'
 import { registerCursorAccountHandlers } from '../cursor-accounts'
+import { registerNineRouterAccountHandlers } from '../ninerouter-accounts'
 import { registerUpdaterHandlers } from '../../window/attach-main-window-services'
 import {
   registerClipboardHandlers,
@@ -76,6 +77,7 @@ import type { ClaudeUsageStore } from '../../claude-usage/store'
 import type { CodexUsageStore } from '../../codex-usage/store'
 import type { OpenCodeUsageStore } from '../../opencode-usage/store'
 import type { MuseUsageStore } from '../../muse-usage/store'
+import type { NineRouterUsageStore } from '../../ninerouter-usage/store'
 import type { RateLimitService } from '../../rate-limits/service'
 import type { CodexAccountService } from '../../codex-accounts/service'
 import type { ClaudeAccountService } from '../../claude-accounts/service'
@@ -118,6 +120,7 @@ export function registerCoreHandlers(
   codexUsage: CodexUsageStore,
   openCodeUsage: OpenCodeUsageStore,
   museUsage: MuseUsageStore,
+  nineRouterUsage: NineRouterUsageStore,
   codexAccounts: CodexAccountService,
   claudeAccounts: ClaudeAccountService,
   rateLimits: RateLimitService,
@@ -147,7 +150,13 @@ export function registerCoreHandlers(
   registerAppHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
   registerCliHandlers()
   registerPreflightHandlers()
-  registerUsageProviderHandlers({ claudeUsage, codexUsage, openCodeUsage, museUsage })
+  registerUsageProviderHandlers({
+    claudeUsage,
+    codexUsage,
+    openCodeUsage,
+    museUsage,
+    nineRouterUsage
+  })
   registerCodexAccountHandlers(codexAccounts, () => store.getSettings())
   registerAgentHookHandlers(runtime, { getPtyIdForPaneKey })
   registerCodexConfigSyncHandlers(codexAccounts.runtimeHomeService)
@@ -157,6 +166,7 @@ export function registerCoreHandlers(
   registerZcodePlanCredentialsHandlers(rateLimits)
   registerGrokAccountHandlers()
   registerCursorAccountHandlers()
+  registerNineRouterAccountHandlers()
   registerRateLimitHandlers(rateLimits, codexAccounts)
   registerGitHubHandlers(store, stats)
   registerGitLabHandlers(store)
@@ -223,16 +233,16 @@ export function registerCoreHandlers(
   registerRuntimeHandlers(runtime)
   registerRuntimeEnvironmentHandlers(store)
   registerEphemeralVmHandlers(store, pluginService)
+  // Session history and terminal resume are not chats; a refused host leaves nothing to check.
+  const ensureStructuredSessionOwnership = () =>
+    ensureStructuredAgentSessionHostUnlessRefused(() => runtime.ensureStructuredAgentSessionHost())
   registerAiVaultSearchHandlers({
     callRuntimeSearch: (environmentId, method, params) =>
-      callRuntimeSessionSearch(app.getPath('userData'), environmentId, method, params)
+      callRuntimeSessionSearch(app.getPath('userData'), environmentId, method, params),
+    ensureStructuredSessionOwnership
   })
   registerAiVaultHandlers({
-    // Session history and terminal resume are not chats; a refused host leaves nothing to check.
-    ensureStructuredSessionOwnership: () =>
-      ensureStructuredAgentSessionHostUnlessRefused(() =>
-        runtime.ensureStructuredAgentSessionHost()
-      ),
+    ensureStructuredSessionOwnership,
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
     prepareSessionResume: lifecycleOptions.prepareAiVaultSessionResume,
     getActiveRuntimeAiVaultHostInfos: () =>

@@ -6,6 +6,7 @@ import type { ClaudeUsageStore } from '../claude-usage/store'
 import type { CodexUsageStore } from '../codex-usage/store'
 import type { OpenCodeUsageStore } from '../opencode-usage/store'
 import type { MuseUsageStore } from '../muse-usage/store'
+import type { NineRouterUsageStore } from '../ninerouter-usage/store'
 import type { CodexAccountService } from '../codex-accounts/service'
 import type { CodexRuntimeHomeService } from '../codex-accounts/runtime-home-service'
 import type { ClaudeAccountService } from '../claude-accounts/service'
@@ -14,6 +15,7 @@ import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import type { RateLimitService } from '../rate-limits/service'
 import type { OrcaRuntimeRpcServer } from '../runtime/runtime-rpc'
 import type { DesktopRelayService } from '../runtime/relay/desktop-relay-service'
+import type { DesktopRelayServiceInstaller } from '../runtime/relay/desktop-relay-service-installer'
 import type { DesktopPushService } from '../runtime/push/desktop-push-service'
 import type { StarNagService } from '../star-nag/service'
 import type { AgentAwakeService } from '../agent-awake-service'
@@ -77,6 +79,8 @@ export const mainProcessState = {
   openCodeUsage: null as OpenCodeUsageStore | null,
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: widens the null slot to the store type assigned by main-process-observers.
   museUsage: null as MuseUsageStore | null,
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: mirrors the other usage-store slots, populated during startup.
+  nineRouterUsage: null as NineRouterUsageStore | null,
   codexAccounts: null as CodexAccountService | null,
   codexRuntimeHome: null as CodexRuntimeHomeService | null,
   codexSessionMigration: null as ReturnType<typeof createCodexSessionMigrationScheduler> | null,
@@ -87,6 +91,8 @@ export const mainProcessState = {
   runtimeRpc: null as OrcaRuntimeRpcServer | null,
   serveReadinessPublisher: new ServeReadinessPublisher(),
   desktopRelayService: null as DesktopRelayService | null,
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: widens the null slot to the installer assigned by main-process-relay-startup.
+  desktopRelayInstaller: null as DesktopRelayServiceInstaller | null,
   desktopPushService: null as DesktopPushService | null,
   desktopRelayStatus: 'offline' as RelayBrokerStatus,
   desktopRelayCellUrl: undefined as string | undefined,

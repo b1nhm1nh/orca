@@ -7,7 +7,10 @@ import { normalizeUsagePercentageDisplay } from '../../../../shared/usage-percen
 import { normalizeStatusBarUsageMode } from '../../../../shared/status-bar-usage-mode'
 import { isStatusBarItemAvailable } from './status-bar-agent-gating'
 import { getVisibleUsageProvider, isUsageEmptyState } from './status-bar-provider-visibility'
-import { getUsageProviderAccountsSectionId } from './usage-provider-settings-target'
+import {
+  getUsageProviderAccountsSectionId,
+  usageRowSignInOpensSettings
+} from './usage-provider-settings-target'
 import { useStatusBarMenuFocusHandoff } from './ProviderDetailsMenu'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '@/lib/close-all-context-menus'
 import { useStatusBarDensity } from './status-bar-density'
@@ -94,6 +97,7 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
 
   const { claude, codex, gemini, opencodeGo, kimi, antigravity, minimax, grok, cursor, zcode } =
     rateLimits
+  const ninerouter = rateLimits.ninerouter ?? null
 
   // Why: a bar is earned by a live snapshot or durable Settings setup; detection-gating hides per-CLI bars when the agent isn't on PATH.
   // Why: Antigravity has no persisted credential, so a checked status item + detected CLI is the durable "show its slot" signal.
@@ -120,6 +124,9 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
   const visibleGrok = getVisibleUsageProvider('grok', grok, usageSettings)
   const visibleCursor = getVisibleUsageProvider('cursor', cursor, usageSettings)
   const visibleZcode = getVisibleUsageProvider('zcode', zcode, usageSettings)
+  const visibleNinerouter = getVisibleUsageProvider('ninerouter', ninerouter, usageSettings)
+  // Why: the gateway is a local service, not a CLI on PATH; an unavailable snapshot already hides it.
+  const showNinerouter = visibleNinerouter !== null && statusBarItems.includes('ninerouter')
   const showClaude =
     visibleClaude !== null &&
     statusBarItems.includes('claude') &&
@@ -174,11 +181,24 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
     showMiniMax ||
     showGrok ||
     showCursor ||
-    showZcode
+    showZcode ||
+    showNinerouter
   const anyVisible = hasVisibleUsageMeters || showResourceUsage
   // Why: include Settings so durable managed accounts count — a configured user isn't shown the empty state while snapshots hydrate.
   const isEmptyUsageState = isUsageEmptyState(
-    { claude, codex, gemini, opencodeGo, kimi, antigravity, minimax, grok, cursor, zcode },
+    {
+      claude,
+      codex,
+      gemini,
+      opencodeGo,
+      kimi,
+      antigravity,
+      minimax,
+      grok,
+      cursor,
+      zcode,
+      ninerouter
+    },
     usageSettings
   )
   // Why: one-time nudge — once dismissed, stays hidden even if providers reconnect later.
@@ -193,7 +213,8 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
     minimax?.status === 'fetching' ||
     grok?.status === 'fetching' ||
     cursor?.status === 'fetching' ||
-    zcode?.status === 'fetching'
+    zcode?.status === 'fetching' ||
+    ninerouter?.status === 'fetching'
 
   const floatingTerminalActionLabel = floatingTerminalOpen
     ? 'Minimize Floating Workspace'
@@ -212,7 +233,8 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
     showMiniMax ? visibleMiniMax : null,
     showGrok ? visibleGrok : null,
     showCursor ? visibleCursor : null,
-    showZcode ? visibleZcode : null
+    showZcode ? visibleZcode : null,
+    showNinerouter ? visibleNinerouter : null
   ].filter((p): p is ProviderRateLimits => p !== null)
 
   const handleManageAccounts = (): void => {
@@ -234,6 +256,8 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
     openSettingsTarget({ pane: 'accounts', repoId: null, sectionId })
     openSettingsPage()
   }
+  const canSignInFromUsageRow = (provider: ProviderRateLimits['provider']): boolean =>
+    usageRowSignInOpensSettings(provider, settings)
   const handleUsageMenuOpenChange = (nextOpen: boolean): void => {
     if (nextOpen) {
       usageMenuFocusHandoff.reset()
@@ -246,6 +270,7 @@ export function useStatusBarController(floatingTerminalOpen: boolean) {
     anyFetching,
     anyVisible,
     barRef,
+    canSignInFromUsageRow,
     collapseUsage,
     collapsedUsageProviders,
     compact,

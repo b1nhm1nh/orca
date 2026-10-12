@@ -9,6 +9,8 @@ import { initTelemetry, track } from '../telemetry/client'
 import { setCodexTrustGrantTelemetry } from '../codex/codex-trust-grant-telemetry'
 import { initObservability } from '../observability'
 import { recordDurableCrashBreadcrumb } from '../crash-reporting/durable-crash-breadcrumb'
+import { reportPreviousHangDetection } from '../hang-watchdog/previous-hang-detection'
+import { getCanonicalUserDataPath } from '../persistence'
 import { recoverPendingSkillTransactions } from '../skills/skill-transaction-startup-recovery'
 import { initCohortClassifier } from '../telemetry/cohort-classifier'
 import { initOnboardingCohortClassifier } from '../telemetry/onboarding-cohort-classifier'
@@ -18,6 +20,7 @@ import { ClaudeUsageStore } from '../claude-usage/store'
 import { CodexUsageStore } from '../codex-usage/store'
 import { OpenCodeUsageStore } from '../opencode-usage/store'
 import { MuseUsageStore } from '../muse-usage/store'
+import { NineRouterUsageStore } from '../ninerouter-usage/store'
 import { installRepoMaintenanceIdleGate } from '../repo-maintenance-idle-gate'
 import { mainProcessState as state } from './main-process-state'
 
@@ -67,16 +70,6 @@ export function initializeMainProcessObservers(): void {
       migrated: profileStateStartup.migrated
     })
   }
-  // Why: the breadcrumb alone never leaves the machine — it rides crash reports, and a hang is not
-  // a crash (the app is force-quit, so no report is ever generated). Without this the incidence
-  // number the watchdog exists to produce would sit unread on the user's disk. Must run after
-  // initTelemetry: track() drops silently until the client and store are wired.
-  if (state.hangDetection) {
-    track('main_thread_hang_detected', {
-      unresponsive_ms: Math.round(state.hangDetection.unresponsiveMs),
-      self_recovered: state.hangDetection.selfRecovered
-    })
-  }
   // Why: the trust-grant module is bundled into plain-node CLI entries where
   // the telemetry client cannot load, so the tracker is injected here instead
   // of imported there.
@@ -101,6 +94,13 @@ export function initializeMainProcessObservers(): void {
     packaged: app.isPackaged,
     platform: process.platform
   })
+  state.hangDetection = reportPreviousHangDetection(getCanonicalUserDataPath())
+  if (state.hangDetection) {
+    track('main_thread_hang_detected', {
+      unresponsive_ms: Math.round(state.hangDetection.unresponsiveMs),
+      self_recovered: state.hangDetection.selfRecovered
+    })
+  }
   state.skillTransactionRecovery = recoverPendingSkillTransactions(
     join(app.getPath('userData'), 'skill-installs')
   )
@@ -136,4 +136,5 @@ export function initializeMainProcessObservers(): void {
   state.codexUsage = new CodexUsageStore(store)
   state.openCodeUsage = new OpenCodeUsageStore(store)
   state.museUsage = new MuseUsageStore(store)
+  state.nineRouterUsage = new NineRouterUsageStore(store)
 }

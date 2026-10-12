@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BarChart3, Bot, Check, ChevronDown, Clock, GitPullRequest } from 'lucide-react'
+import { BarChart3, Bot, Check, ChevronDown, Clock, GitPullRequest, Route } from 'lucide-react'
 import { useAppStore } from '../../store'
 import { StatCard } from './StatCard'
 import { ClaudeUsagePane } from './ClaudeUsagePane'
@@ -7,6 +7,7 @@ import { CodexUsagePane } from './CodexUsagePane'
 import { GrokUsagePane } from './GrokUsagePane'
 import { OpenCodeUsagePane } from './OpenCodeUsagePane'
 import { MuseUsagePane } from './MuseUsagePane'
+import { NineRouterUsagePane } from './NineRouterUsagePane'
 import { UsageOverviewPane } from './UsageOverviewPane'
 import { Button } from '../ui/button'
 import {
@@ -53,7 +54,7 @@ function formatTrackingSince(timestamp: number | null): string {
   })
 }
 
-type UsageTab = 'overview' | 'claude' | 'codex' | 'opencode' | 'muse' | 'grok'
+type UsageTab = 'overview' | 'claude' | 'codex' | 'opencode' | 'muse' | 'ninerouter' | 'grok'
 
 const USAGE_ANALYTICS_OPTIONS = [
   {
@@ -87,6 +88,12 @@ const USAGE_ANALYTICS_OPTIONS = [
     }
   },
   {
+    id: 'ninerouter',
+    get label() {
+      return translate('auto.components.stats.StatsPane.nineRouterUsageTab', '9router')
+    }
+  },
+  {
     id: 'grok',
     get label() {
       return translate('auto.components.stats.StatsPane.grokUsageTab', 'Grok')
@@ -97,6 +104,10 @@ const USAGE_ANALYTICS_OPTIONS = [
 function UsageAnalyticsOptionIcon({ tab }: { tab: UsageTab }): React.JSX.Element {
   if (tab === 'overview') {
     return <BarChart3 className="size-3.5 text-muted-foreground" />
+  }
+  // Why: 9router is a gateway, not an agent, so it has no agent-catalog entry to icon.
+  if (tab === 'ninerouter') {
+    return <Route className="size-3.5 text-muted-foreground" />
   }
   return <AgentIcon agent={tab} size={14} />
 }
@@ -217,6 +228,8 @@ export function StatsPane(): React.JSX.Element {
             <OpenCodeUsagePane />
           ) : activeUsageTab === 'muse' ? (
             <MuseUsagePane />
+          ) : activeUsageTab === 'ninerouter' ? (
+            <NineRouterUsagePane />
           ) : (
             <GrokUsagePane />
           )}

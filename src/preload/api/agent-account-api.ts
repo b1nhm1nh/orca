@@ -6,6 +6,7 @@ import type {
 import type { CodexConfigSyncStatus } from '../../shared/codex-config-sync-types'
 import type { CursorAccountStatus, GrokAccountStatus } from '../../shared/rate-limit-types'
 import type { ZcodePlanCredentialsStatus } from '../../shared/zcode-plan-sites'
+import type { NineRouterGatewayStatus } from '../../shared/ninerouter-usage-types'
 
 export type CodexAccountsApi = {
   list: () => Promise<CodexRateLimitAccountsState>
@@ -47,9 +48,16 @@ export type ClaudeAccountsApi = {
   add: (args?: {
     runtime?: 'host' | 'wsl'
     wslDistro?: string | null
+    /** Copy the sign-in link instead of opening the default browser. */
+    copyLink?: boolean
   }) => Promise<ClaudeRateLimitAccountsState>
   cancelPendingLogin: () => Promise<boolean>
-  reauthenticate: (args: { accountId: string }) => Promise<ClaudeRateLimitAccountsState>
+  reauthenticate: (args: {
+    accountId: string
+    copyLink?: boolean
+  }) => Promise<ClaudeRateLimitAccountsState>
+  /** The pending sign-in's link once Claude hands it over; null if it ends without one. */
+  waitForSignInLink: () => Promise<string | null>
   remove: (args: { accountId: string }) => Promise<ClaudeRateLimitAccountsState>
   select: (args: {
     accountId: string | null
@@ -64,6 +72,10 @@ export type GrokAccountsApi = {
 
 export type CursorAccountsApi = {
   getStatus: () => Promise<CursorAccountStatus>
+}
+
+export type NineRouterAccountsApi = {
+  getStatus: () => Promise<NineRouterGatewayStatus>
 }
 
 export type MinimaxCredentialsApi = {

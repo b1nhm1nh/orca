@@ -19,6 +19,11 @@ import type {
   MuseUsageScope,
   MuseUsageSnapshot
 } from '../../../../shared/muse-usage-types'
+import type {
+  NineRouterUsageRange,
+  NineRouterUsageScope,
+  NineRouterUsageSnapshot
+} from '../../../../shared/ninerouter-usage-types'
 import type { AppState } from '../types'
 
 type UsageSnapshot = {
@@ -273,11 +278,21 @@ type OpenCodeUsageTypes = UsageProviderTypes<
 >
 
 type MuseUsageTypes = UsageProviderTypes<MuseUsageScope, MuseUsageRange, MuseUsageSnapshot>
+type NineRouterUsageTypes = UsageProviderTypes<
+  NineRouterUsageScope,
+  NineRouterUsageRange,
+  NineRouterUsageSnapshot
+>
 
 export type ClaudeUsageSlice = ProviderUsageSlice<'claude', 'Claude', ClaudeUsageTypes>
 export type CodexUsageSlice = ProviderUsageSlice<'codex', 'Codex', CodexUsageTypes>
 export type OpenCodeUsageSlice = ProviderUsageSlice<'openCode', 'OpenCode', OpenCodeUsageTypes>
 export type MuseUsageSlice = ProviderUsageSlice<'muse', 'Muse', MuseUsageTypes>
+export type NineRouterUsageSlice = ProviderUsageSlice<
+  'nineRouter',
+  'NineRouter',
+  NineRouterUsageTypes
+>
 
 export const createClaudeUsageSlice = createUsageProviderSlice<
   'claude',
@@ -321,4 +336,17 @@ export const createMuseUsageSlice = createUsageProviderSlice<'muse', 'Muse', Mus
   initialRange: '30d',
   getApi: () => window.api.museUsage,
   hasCachedData: (state) => state.hasAnyMuseData
+})
+
+export const createNineRouterUsageSlice = createUsageProviderSlice<
+  'nineRouter',
+  'NineRouter',
+  NineRouterUsageTypes
+>({
+  prefix: 'nineRouter',
+  name: 'NineRouter',
+  initialScope: 'all',
+  initialRange: '30d',
+  getApi: () => window.api.nineRouterUsage,
+  hasCachedData: (state) => state.hasAnyNinerouterData
 })

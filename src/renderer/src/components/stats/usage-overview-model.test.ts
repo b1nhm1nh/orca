@@ -160,7 +160,8 @@ describe('usage overview model', () => {
         summary: openCodeSummary,
         daily: openCodeDaily
       },
-      muse: { scanState: null, summary: null, daily: [] }
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.totalTokens).toBe(10_800)
@@ -216,7 +217,8 @@ describe('usage overview model', () => {
         claude: { scanState: null, summary: null, daily: [] },
         codex: { scanState: enabledCodexScanState(), summary: codexSummary, daily: [] },
         opencode: { scanState: null, summary: null, daily: [] },
-        muse: { scanState: null, summary: null, daily: [] }
+        muse: { scanState: null, summary: null, daily: [] },
+        ninerouter: { scanState: null, summary: null, daily: [] }
       })
     }
 
@@ -264,7 +266,8 @@ describe('usage overview model', () => {
             totalTokens: 28_300
           }
         ]
-      }
+      },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.providers.find((provider) => provider.id === 'muse')).toMatchObject({
@@ -276,6 +279,52 @@ describe('usage overview model', () => {
     expect(overview.bestDay).toMatchObject({ day: '2026-09-22', museTokens: 28_300 })
     expect(overview.estimatedCostUsd).toBeNull()
     expect(overview.hasPartialCost).toBe(false)
+  })
+
+  it('lists 9router as its own row without adding it to the overview totals', () => {
+    const overview = buildUsageOverview({
+      claude: { scanState: null, summary: null, daily: [] },
+      codex: { scanState: null, summary: null, daily: [] },
+      opencode: { scanState: null, summary: null, daily: [] },
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: {
+        scanState: {
+          enabled: true,
+          isScanning: false,
+          lastScanStartedAt: 1,
+          lastScanCompletedAt: 2,
+          lastScanError: null,
+          hasAnyNinerouterData: true
+        },
+        summary: {
+          scope: 'all',
+          range: '30d',
+          sessions: 3,
+          events: 40,
+          inputTokens: 9_000,
+          cachedInputTokens: 8_000,
+          outputTokens: 500,
+          reasoningOutputTokens: 0,
+          totalTokens: 9_500,
+          costUsd: 4.2,
+          topModel: 'claude-opus-5-5',
+          hasAnyNinerouterData: true
+        },
+        daily: [{ day: '2026-09-22', totalTokens: 9_500, costUsd: 4.2 }]
+      }
+    })
+
+    expect(overview.providers.find((provider) => provider.id === 'ninerouter')).toMatchObject({
+      totalTokens: 9_500,
+      estimatedCostUsd: 4.2,
+      hasPartialCost: false,
+      activeDays: 1
+    })
+    // 9router routes traffic the transcript scans already count, so totals leave it out.
+    expect(overview.totalTokens).toBe(0)
+    expect(overview.estimatedCostUsd).toBeNull()
+    expect(overview.hasPartialCost).toBe(false)
+    expect(overview.daily).toEqual([])
   })
 
   it('pads recent usage days with zero-token cells', () => {
@@ -331,7 +380,8 @@ describe('usage overview model', () => {
       claude: { scanState: null, summary: null, daily: [] },
       codex: { scanState: null, summary: null, daily: [] },
       opencode: { scanState: null, summary: null, daily: [] },
-      muse: { scanState: null, summary: null, daily: [] }
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.hasAnyEnabledProvider).toBe(false)
@@ -362,7 +412,8 @@ describe('usage overview model', () => {
         daily: codexDaily
       },
       opencode: { scanState: null, summary: null, daily: [] },
-      muse: { scanState: null, summary: null, daily: [] }
+      muse: { scanState: null, summary: null, daily: [] },
+      ninerouter: { scanState: null, summary: null, daily: [] }
     })
 
     expect(overview.daily).toHaveLength(130_000)

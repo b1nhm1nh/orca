@@ -1,3 +1,4 @@
+import { readTerminalSpawnDeferral } from '../../../../shared/host-spawn-admission'
 import { isRuntimeOwnedSshTargetId } from '../../../../shared/execution-host'
 import { readIpcErrorDetail } from '@/lib/ipc-error'
 import { ensurePtyDispatcher } from './pty-dispatcher'
@@ -14,6 +15,7 @@ import { waitAtTerminalPtyPreSpawnE2EBarrier } from './terminal-pty-pre-spawn-e2
 import type { IpcPtySessionHandlers } from './ipc-pty-session-handlers'
 import { isSshSessionGoneError } from './pty-connection/pty-connect-limits'
 import { spawnIpcPty } from './ipc-pty-spawn-request'
+import { agentLaunchPaneSpawnHold } from '@/lib/agent-launch-pane-spawn-hold'
 import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty-transport-types'
 
 const SSH_PTY_CONNECTION_MISMATCH_MARKER = 'belongs to SSH connection'
@@ -77,6 +79,14 @@ export async function connectIpcPty(
     const preSpawnBarrier = waitAtTerminalPtyPreSpawnE2EBarrier()
     if (preSpawnBarrier) {
       await preSpawnBarrier
+      if (context.isDestroyed()) {
+        return
+      }
+    }
+    // A launch pane this window made spawns only once the host has taken it.
+    const launchPaneHold = agentLaunchPaneSpawnHold(transportOptions.tabId, transportOptions.leafId)
+    if (launchPaneHold) {
+      await launchPaneHold
       if (context.isDestroyed()) {
         return
       }
@@ -188,6 +198,11 @@ function handleConnectError(
     return { id: options.sessionId, sessionExpired: true }
   }
   if (message.includes('was explicitly killed')) {
+    return undefined
+  }
+  const deferral = readTerminalSpawnDeferral(message)
+  if (deferral) {
+    context.getCallbacks().onSpawnDeferred?.(deferral)
     return undefined
   }
   if (connectionId && options.sessionId && message.includes(SSH_PTY_CONNECTION_MISMATCH_MARKER)) {
