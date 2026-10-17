@@ -283,7 +283,8 @@
         "antigravityToggleDescription": "Show Antigravity subscription usage for the active workspace.",
         "grokToggleDescription": "Show Grok subscription credit usage when signed in via Grok CLI.",
         "cursorToggleDescription": "Show Cursor plan usage when signed in through cursor-agent or Cursor IDE.",
-        "zcodeToggleDescription": "Show ZCode Coding Plan quota usage."
+        "zcodeToggleDescription": "Show ZCode Coding Plan quota usage.",
+        "ninerouterToggleDescription": "Show quota for the models 9router routed in the last 24 hours."
       },
       "menuBarIcon": {
         "title": "Show Menu Bar Icon",
@@ -3806,7 +3807,8 @@
             "2148f65e04": "PowerShell",
             "ab589350e5": "Could not build launch command for {{value0}}.",
             "7a9b4af2af": "Scroll tabs left",
-            "232e075b07": "Scroll tabs right"
+            "232e075b07": "Scroll tabs right",
+            "cmder": "Cmder"
           },
           "TabBarCreateEntry": {
             "d62d63b807": "Create file",
@@ -4105,7 +4107,8 @@
             "codexSignInError": "Codex sign-in failed. Please try again.",
             "cursorUsageMenu": "Cursor Usage",
             "hiddenUsageProviders": "Also: {{value0}}",
-            "zcodeUsageMenu": "ZCode Usage"
+            "zcodeUsageMenu": "ZCode Usage",
+            "ninerouterUsageMenu": "9router Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "Connect an account",
@@ -4607,7 +4610,8 @@
           "rangeLast7Days": "Last 7 days",
           "rangeLast30Days": "Last 30 days",
           "rangeLast90Days": "Last 90 days",
-          "rangeAllTime": "All time"
+          "rangeAllTime": "All time",
+          "0eaf937335": "Est. cost"
         },
         "ShareUsageButton": {
           "7d6b25323d": "Share on X",
@@ -4642,7 +4646,8 @@
           "eb6a066185": "claude",
           "eee19cfade": "overview",
           "grokUsageTab": "Grok",
-          "trackingSince": "Tracking since {{value0}}"
+          "trackingSince": "Tracking since {{value0}}",
+          "nineRouterUsageTab": "9router"
         },
         "UsageOverviewPane": {
           "22ed1b7669": "sessions",
@@ -4701,7 +4706,8 @@
             "d6e9f0a1b2": "credits",
             "a3b6c7d8e9": "grok usage",
             "9f2a3b4c5d": "xai",
-            "museKeyword": "muse"
+            "museKeyword": "muse",
+            "nineRouterKeyword": "9router"
           }
         },
         "usage": {
@@ -4779,6 +4785,23 @@
           "emptyMessage": "No local Muse usage found yet for this scope.",
           "noCostNote": "Muse session logs record tokens but not cost, so no cost estimate is shown.",
           "recentSessionsDescription": "Most recent local Muse sessions in this scope."
+        },
+        "NineRouterUsageDailyChart": {
+          "subtitle": "Total tokens and cost per day as 9router reports them.",
+          "cost": "Cost"
+        },
+        "NineRouterUsageDetails": {
+          "recentSessionsDescription": "Per-model totals 9router has routed, newest first."
+        },
+        "NineRouterUsagePane": {
+          "rangeLast60Days": "Last 60 days",
+          "title": "9router Usage",
+          "enableLabel": "Enable 9router usage analytics",
+          "disabledDescription": "Reads usage and cost from the 9router gateway on this machine (127.0.0.1:20128).",
+          "optionsLabel": "9router usage options",
+          "refreshAriaLabel": "Refresh 9router usage",
+          "emptyMessage": "No 9router usage found yet for this range.",
+          "costNote": "Cost is what 9router priced at request time; zero cost with non-zero tokens means that model has no price configured."
         }
       },
       "sparse": {
@@ -9222,7 +9245,8 @@
           "a909136b3f": "shell",
           "1c29734248": "Shell used for new terminal panes",
           "9589abc009": "Default shell",
-          "5a5eac2f44": "Shell not found: {{value0}}"
+          "5a5eac2f44": "Shell not found: {{value0}}",
+          "cmder": "Cmder"
         },
         "TerminalSettingsPreview": {
           "a63953a48a": "Preview {{value0}} theme",
@@ -9483,6 +9507,15 @@
                 "bigmodel": "bigmodel",
                 "codingPlan": "coding plan",
                 "rateLimit": "rate limit"
+              }
+            },
+            "ninerouter": {
+              "title": "9router",
+              "description": "Connection status, model quota and routed accounts of the local 9router gateway.",
+              "kw": {
+                "router": "router",
+                "gateway": "gateway",
+                "quota": "quota"
               }
             }
           }
@@ -9760,7 +9793,10 @@
               "kw": {
                 "cursor": "cursor"
               }
-            }
+            },
+            "ninerouterUsageTitle": "9router Usage",
+            "ninerouterUsageDescription": "Show quota for the models the local 9router gateway is routing in the status bar.",
+            "ninerouter": "9router"
           }
         },
         "auto": {
@@ -12891,6 +12927,31 @@
           "confirm": "Restart",
           "terminalsUnknown": "Orca couldn’t confirm whether terminals are running on this host, so it didn’t restart the managed server.",
           "terminalsRunning": "{{count}} terminals are still running on this host. Close them, then restart the managed server."
+        },
+        "NineRouterAccountsSection": {
+          "resetIn": "resets in {{value0}}",
+          "state": {
+            "disabled": "Disabled",
+            "rateLimitedFor": "Rate-limited · {{value0}}",
+            "rateLimited": "Rate-limited",
+            "active": "Active"
+          },
+          "loading": "Loading…",
+          "notInstalled": "9router not found on this computer",
+          "notRunning": "9router is not running",
+          "connected": "Connected to 9router on 127.0.0.1:20128",
+          "trackingTitle": "Track 9router usage",
+          "subtitle": "Local AI gateway on this computer. Orca signs in with the token 9router keeps in its own data folder, so there is no key to paste.",
+          "notInstalledHelp": "Start 9router once on the computer running Orca so it writes its machine-id and cli-secret, then click Refresh.",
+          "refresh": "Refresh",
+          "trackingDescription": "Read usage, cost and model quota from 9router for Stats & Usage and the status bar.",
+          "trackingHelp": "Same switch as the 9router tab in Stats & Usage.",
+          "statusBarTitle": "Show in status bar",
+          "statusBarDescription": "Show quota for the models 9router routed in the last 24 hours.",
+          "quotaTitle": "Model quota",
+          "quotaDescription": "Quota used for each model, read from the account 9router would pick next.",
+          "accountsTitle": "Routed accounts",
+          "accountsDescription": "Upstream accounts 9router routes through. Manage them in the 9router dashboard."
         }
       },
       "right": {
@@ -14634,7 +14695,10 @@
           "loadingDistros": "Loading distributions",
           "windowsDefault": "Windows default",
           "rightClickBehavior": "Right-click behavior",
-          "rightClickBehaviorDescription": "Pick the terminal mouse behavior that matches your Windows muscle memory."
+          "rightClickBehaviorDescription": "Pick the terminal mouse behavior that matches your Windows muscle memory.",
+          "cmder": "Cmder",
+          "cmderDescription": "Opens Command Prompt with your Cmder prompt, aliases and Clink.",
+          "cmderUnavailable": "Selected, but Cmder was not detected on this machine."
         },
         "mac": {
           "notification": {
