@@ -177,6 +177,7 @@ export const UI_STATE_GLOBAL_FIELDS = [
   '_jiraIssueWorktreeCardPropertyDefaulted',
   '_kimiStatusBarDefaultAdded',
   '_minimaxStatusBarDefaultAdded',
+  '_ninerouterStatusBarDefaultAdded',
   '_portsStatusBarDefaultAdded',
   '_sortBySmartMigrated',
   '_workspaceStatusesDefaultOrderMigrated',
