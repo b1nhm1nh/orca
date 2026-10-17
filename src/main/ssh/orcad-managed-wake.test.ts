@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type * as DeployHelpers from './ssh-relay-deploy-helpers'
+import type * as ExecCommandModule from './ssh-relay-exec-command'
 import type * as InstallLock from './ssh-relay-install-lock'
 
-vi.mock('./ssh-relay-deploy-helpers', async (importOriginal) => ({
-  ...(await importOriginal<typeof DeployHelpers>()),
+vi.mock('./ssh-relay-exec-command', async (importOriginal) => ({
+  ...(await importOriginal<typeof ExecCommandModule>()),
   execCommand: vi.fn()
 }))
 vi.mock('./ssh-connection-utils', () => ({ shellEscape: (s: string) => `'${s}'` }))
@@ -12,7 +12,7 @@ vi.mock('./ssh-relay-install-lock', async (importOriginal) => ({
   acquireInstallLock: vi.fn()
 }))
 
-import { execCommand } from './ssh-relay-deploy-helpers'
+import { execCommand } from './ssh-relay-exec-command'
 import { acquireInstallLock, RemoteInstallLockBusyError } from './ssh-relay-install-lock'
 import { wakeStoppedManagedOrcad } from './orcad-managed-wake'
 import { getRemoteHostPlatform } from './ssh-remote-platform'
@@ -105,6 +105,22 @@ describe('wakeStoppedManagedOrcad', () => {
 
     expect(await wakeStoppedManagedOrcad(slot)).toEqual({ outcome: 'unverifiable' })
     expect(launches()).toEqual([])
+  })
+
+  it('starts an active slot with no launch artifacts at all: nothing ever ran from it', async () => {
+    host = stoppedHost()
+    host.pidFiles.clear()
+    // Neither a PID file nor a readiness file, so the host answers NEVER_LAUNCHED, not UNKNOWN.
+    vi.mocked(execCommand).mockImplementation(async (_conn, command) =>
+      command.includes('echo LIVE;') && !host.alive.has(OLD) ? 'NEVER_LAUNCHED' : host.exec(command)
+    )
+
+    const wake = await wakeStoppedManagedOrcad(slot)
+
+    expect(wake.outcome).toBe('started')
+    expect([...host.alive]).toEqual([OLD])
+    expect(host.fence).toBe(false)
+    expect(launches()).toHaveLength(1)
   })
 
   it('defers to an update or recovery that holds the activation fence', async () => {

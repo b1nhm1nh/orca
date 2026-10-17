@@ -3,13 +3,11 @@ import type {
   RuntimeMobileSessionTabsResult
 } from '../../../../shared/runtime-types'
 import { markStructuredAgentSessionLaunchesPublished } from '../../lib/structured-agent-session-launch-publication'
-import type { WorktreeRuntimeOwnerState } from '../../lib/worktree-runtime-owner'
+import type { WorktreeRuntimeOwnerState } from '../../lib/worktree-runtime-owner-state'
 import { getExecutionHostIdForWorktree } from '../../lib/worktree-runtime-owner'
-import {
-  applyWebSessionTabsSnapshot,
-  applyWebSessionTabsStorePatch
-} from '../web-session-tabs-sync'
-import type { WebSessionTabsSyncState } from '../web-session-tabs-sync'
+import { applyWebSessionTabsSnapshot } from '../web-session-tabs-sync/snapshot-api'
+import { applyWebSessionTabsStorePatch } from '../web-session-tabs-sync/store-patch'
+import type { WebSessionTabsSyncState } from '../web-session-tabs-sync/state'
 import {
   admitRetiredValueUnderAuthority,
   noteRetiredValue,
@@ -31,7 +29,7 @@ import { LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
 import {
   beginStructuredAgentSessionAuthoritativeInventory,
   startStructuredAgentLaunchCancellationCleanup
-} from '../../lib/structured-agent-session-launch-cancellation'
+} from '../../lib/launch-cancel-tombstones-compat/structured-agent-session-launch-cancellation'
 import { suppressCancelledStructuredSessionTabs } from '../structured-agent-session-tab-retirement'
 import { LOCAL_STRUCTURED_SESSION_OWNER } from '../local-structured-session-owner'
 import { closeStructuredAgentSession } from '../structured-agent-session-close'

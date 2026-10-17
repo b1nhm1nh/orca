@@ -5,6 +5,7 @@ import { appApi } from './api/app-bridge'
 import { orcaProfilesApi } from './api/orca-profiles-bridge'
 import { platformApi } from './api/platform-bridge'
 import { wslApi } from './api/wsl-bridge'
+import { wslMoveApi } from './api/wsl-move-bridge'
 import { pwshApi } from './api/pwsh-bridge'
 import { cmderApi, gitBashApi } from './api/git-bash-bridge'
 import { pluginsApi } from './api/plugins-bridge'
@@ -79,6 +80,7 @@ import { grokAccountsApi } from './api/grok-accounts-bridge'
 import { cursorAccountsApi } from './api/cursor-accounts-bridge'
 import { nineRouterAccountsApi } from './api/ninerouter-accounts-bridge'
 import { sshApi } from './api/ssh-bridge'
+import { legacyRelayBridgeApi } from './api/legacy-relay-bridge-api'
 import { automationsApi } from './api/automations-bridge'
 import { e2eApi } from './api/e2e-bridge'
 import { mobileApi } from './api/mobile-bridge'
@@ -102,6 +104,7 @@ const api = {
   orcaProfiles: orcaProfilesApi,
   platform: platformApi,
   wsl: wslApi,
+  wslMove: wslMoveApi,
   pwsh: pwshApi,
   gitBash: gitBashApi,
   cmder: cmderApi,
@@ -181,6 +184,7 @@ const api = {
   cursorAccounts: cursorAccountsApi,
   nineRouterAccounts: nineRouterAccountsApi,
   ssh: sshApi,
+  legacyRelayBridge: legacyRelayBridgeApi,
   automations: automationsApi,
   e2e: e2eApi,
   mobile: mobileApi,

@@ -9,10 +9,12 @@ import { LAYOUT_ORACLE_E2E_SPECS } from './pr-layout-oracle-route.mjs'
 
 const isProductSource = (file) => !/\.test\.tsx?$/.test(file) && !isUnitTestSupportSource(file)
 
-// Why config/patches: the xterm fork owns the helper textarea an input method attaches to, so a
-// patch edit can break composition without touching a file named "ime".
+// The core xterm patch owns the helper textarea an input method attaches to.
+const XTERM_CORE_PATCH =
+  /^config\/patches\/(?:@xterm__xterm@[^/]+\.patch|xterm-src\/@xterm__xterm@[^/]+\.src\.patch)$/
+
 const NATIVE_IME_PRODUCT_SOURCE =
-  /^(?:config\/patches\/|src\/shared\/terminal-unicode-provider\.ts$|src\/renderer\/src\/lib\/pane-manager\/terminal-ime-|src\/renderer\/src\/components\/terminal-pane\/(?:terminal-ime-|terminal-ios-hangul-|xterm-bypass-policy))/
+  /^(?:src\/shared\/terminal-unicode-provider\.ts$|src\/renderer\/src\/lib\/pane-manager\/terminal-ime-|src\/renderer\/src\/components\/terminal-pane\/(?:terminal-ime-|terminal-ios-hangul-|xterm-bypass-policy))/
 
 /** The harness itself: the session runner, the boundary probes, and the native specs. */
 const NATIVE_IME_HARNESS =
@@ -109,12 +111,35 @@ export const PR_E2E_SOURCE_ROUTES = [
         /^src\/main\/startup\/(?:windows-app-data-path|main-process-preflight)\.ts$/.test(file))
   },
   {
+    id: 'clipboard.windows-copy-file',
+    specs: ['tests/e2e/file-explorer-copy-file-windows.spec.ts'],
+    matches: (file) =>
+      isProductSource(file) &&
+      /^src\/(?:main\/window\/clipboard-(?:file-copy|ipc-handlers)|renderer\/src\/components\/right-sidebar\/file-explorer-row-file-transfer)\.ts$/.test(
+        file
+      )
+  },
+  {
     id: 'ssh.orcad-auto-convert',
     specs: ['tests/e2e/ssh-orcad-auto-convert.spec.ts'],
     matches: (file) =>
       MANAGED_SSH_HARNESS.test(file) ||
       (isProductSource(file) &&
         /^src\/main\/(?:ipc\/ssh-host-server-|ssh\/(?:ssh-host-server-|orcad-runtime-conversion|orcad-migration-|orcad-retained-source|orcad-runtime-deployment))/.test(
+          file
+        ))
+  },
+  // COMPAT(legacy-relay-bridge): revisit 2027-01-15 with src/main/ssh/legacy-relay-bridge/.
+  {
+    id: 'ssh.orcad-legacy-relay-bridge',
+    specs: ['tests/e2e/ssh-orcad-legacy-relay-bridge.spec.ts'],
+    matches: (file) =>
+      MANAGED_SSH_HARNESS.test(file) ||
+      /^tests\/e2e\/(?:helpers\/(?:legacy-relay-docker-host|build-released-relay-bundle)|cross-version-wire\/released-relay-(?:daemon|transport))\.m?ts$/.test(
+        file
+      ) ||
+      (isProductSource(file) &&
+        /(?:legacy-relay-bridge|orcad-migration-terminal-gate|ssh-host-relay-terminals-on-connect)/.test(
           file
         ))
   },
@@ -142,6 +167,24 @@ export const PR_E2E_SOURCE_ROUTES = [
     matches: (file) =>
       isProductSource(file) &&
       /^src\/(?:main\/browser\/local-ssh-browser|main\/ipc\/browser\.ts$|renderer\/src\/(?:lib\/(?:ssh-workspace-browser-route-eligibility|worktree-host-connection-phase)|components\/browser-pane\/use-ssh-workspace-browser-route|store\/repos\/converted-ssh-browser-pages|store\/slices\/browser\/browser-tab-actions|hooks\/ipc-events\/ssh-managed-server-state-effects))/.test(
+        file
+      )
+  },
+  {
+    id: 'ssh.orcad-terminal-browser-link',
+    specs: ['tests/e2e/ssh-orcad-terminal-browser-link.spec.ts'],
+    matches: (file) =>
+      isProductSource(file) &&
+      /^src\/renderer\/src\/(?:lib\/(?:workspace-browser-tab-open|http-link-(?:destinations|routing)|ssh-workspace-browser-route-eligibility)|components\/terminal-pane\/terminal-http-link-source-owner)\.ts$/.test(
+        file
+      )
+  },
+  {
+    id: 'ssh.orcad-desktop-browser-bridge',
+    specs: ['tests/e2e/ssh-orcad-desktop-browser-bridge.spec.ts'],
+    matches: (file) =>
+      isProductSource(file) &&
+      /^src\/(?:shared\/desktop-browser-bridge-protocol\.ts$|main\/(?:runtime\/desktop-browser-bridge\/|browser\/desktop-browser-bridge\/|ipc\/desktop-browser-bridge-|runtime\/rpc\/methods\/desktop-browser-bridge\.ts$))/.test(
         file
       )
   },
@@ -183,7 +226,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     matches: (file) =>
       MANAGED_SSH_HARNESS.test(file) ||
       (isProductSource(file) &&
-        /^src\/(?:main\/(?:orcad\/orcad-(?:idle-|managed-idle-)|ssh\/orcad-(?:managed-serving|managed-wake|managed-tunnel|recovery-slot|remote-launch|remote-runtime-control))|shared\/orcad-idle-exit)/.test(
+        /^src\/(?:main\/(?:orcad\/orcad-(?:idle-|managed-idle-)|ssh\/orcad-(?:already-active-wake|runtime-deployment|managed-serving|managed-wake|managed-tunnel|recovery-slot|remote-launch|remote-runtime-control))|shared\/orcad-idle-exit)/.test(
           file
         ))
   },
@@ -224,7 +267,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     ],
     matches: (file) =>
       isProductSource(file) &&
-      /^(?:config\/scripts\/(?:verify-wsl-e2e-participation|verify-playwright-participation)\.mjs$|src\/main\/(?:wsl[/-]|pty\/.*wsl|providers\/wsl)|src\/shared\/(?:wsl-|windows-terminal-shell)|src\/renderer\/src\/.*(?:terminal-paste|pty-paste)|tests\/e2e\/(?:golden-tab-bar-agent-launch\.spec|terminal-windows-shell-paste-ownership\.spec|helpers\/(?:wsl-golden-stub-agent|golden-stub-agent))|\.github\/(?:actions\/setup-wsl-test-runtime\/|workflows\/windows-wsl-e2e\.yml))/.test(
+      /^(?:config\/scripts\/(?:verify-wsl-e2e-participation|verify-playwright-participation)\.mjs$|src\/main\/(?:wsl[/-]|pty\/.*wsl|providers\/wsl)|src\/shared\/(?:wsl-|windows-terminal-shell)|src\/renderer\/src\/.*(?:terminal-paste|pty-paste)|tests\/e2e\/(?:golden-tab-bar-agent-launch\.spec|terminal-windows-shell-paste-ownership\.spec|terminal-inline-images-windows\.spec|helpers\/(?:wsl-golden-stub-agent|golden-stub-agent))|\.github\/(?:actions\/setup-wsl-test-runtime\/|workflows\/windows-wsl-e2e\.yml))/.test(
         file
       )
   },
@@ -241,9 +284,10 @@ export const PR_E2E_SOURCE_ROUTES = [
     ],
     matches: (file) =>
       isProductSource(file) &&
-      /^(?:config\/patches\/|src\/renderer\/src\/components\/terminal-pane\/(?:terminal-ime-|use-terminal-pane-lifecycle|xterm-bypass-policy|terminal-option-shortcut-policy))/.test(
-        file
-      )
+      (XTERM_CORE_PATCH.test(file) ||
+        /^src\/renderer\/src\/components\/terminal-pane\/(?:terminal-ime-|use-terminal-pane-lifecycle|xterm-bypass-policy|terminal-option-shortcut-policy)/.test(
+          file
+        ))
   },
   {
     // Why a route beside terminal-input.ime-and-synthetic-forwarding rather than more specs on
@@ -254,7 +298,8 @@ export const PR_E2E_SOURCE_ROUTES = [
     id: 'terminal-ime.native-input-method',
     specs: ['tests/e2e/terminal-ibus-hangul-native.spec.ts'],
     matches: (file) =>
-      (isProductSource(file) && NATIVE_IME_PRODUCT_SOURCE.test(file)) ||
+      (isProductSource(file) &&
+        (XTERM_CORE_PATCH.test(file) || NATIVE_IME_PRODUCT_SOURCE.test(file))) ||
       NATIVE_IME_HARNESS.test(file)
   },
   {
@@ -271,7 +316,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     specs: ['tests/e2e/paired-quick-open-large-tree.spec.ts'],
     matches: (file) =>
       isProductSource(file) &&
-      /^(?:src\/main\/ipc\/filesystem-(?:list-files|search-file-paths)\.ts|src\/main\/ripgrep\/bundled-ripgrep-path\.ts|src\/main\/providers\/(?:filesystem-provider-contract|ssh-filesystem-provider(?:-capabilities)?)\.ts|src\/main\/runtime\/(?:orca-runtime-files|rpc\/methods\/files)\.ts|src\/renderer\/src\/(?:components\/(?:QuickOpen|quick-open-file-list|quick-open-search)\.tsx?|runtime\/(?:runtime-file-client|runtime-legacy-quick-open-inventory)\.ts)|src\/shared\/(?:quick-open-(?:install-rg|path-search|transport-budget)|ripgrep-process-availability|bundled-ripgrep)\.ts)$/.test(
+      /^(?:src\/main\/ipc\/filesystem-(?:list-files|search-file-paths)\.ts|src\/main\/ripgrep\/bundled-ripgrep-path\.ts|src\/main\/providers\/(?:filesystem-provider-contract|ssh-filesystem-provider(?:-capabilities)?)\.ts|src\/main\/runtime\/(?:orca-runtime-files|rpc\/methods\/files)\.ts|src\/renderer\/src\/(?:components\/(?:QuickOpen|quick-open-file-list|quick-open-search)\.tsx?|runtime\/(?:runtime-file-search-client|runtime-legacy-quick-open-inventory)\.ts)|src\/shared\/(?:quick-open-(?:install-rg|path-search|transport-budget)|ripgrep-process-availability|bundled-ripgrep)\.ts)$/.test(
         file
       )
   },
@@ -323,7 +368,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     specs: ['tests/e2e/paired-remote-terminal-serve-restart-binding.spec.ts'],
     matches: (file) =>
       isProductSource(file) &&
-      /^(?:src\/main\/daemon\/(?:daemon-attach-only-retirement|daemon-pty-applied-size|daemon-pty-session-control|daemon-pty-spawn-result)\.ts|src\/renderer\/src\/components\/terminal-pane\/(?:remote-runtime-pty-transport|terminal-error-accumulation)\.ts|src\/renderer\/src\/runtime\/(?:web-runtime-session|web-session-tabs-sync|web-session-terminal-orphan-(?:topology|recovery(?:-(?:adoption|surface|inventory|inventory-validation|cache|queue|rpc-lane|pane))?))\.ts)$/.test(
+      /^(?:src\/main\/daemon\/(?:daemon-attach-only-retirement|daemon-pty-applied-size|daemon-pty-session-control|daemon-pty-spawn-result)\.ts|src\/renderer\/src\/components\/terminal-pane\/(?:remote-runtime-pty-transport|terminal-error-accumulation)\.ts|src\/renderer\/src\/runtime\/(?:web-runtime-terminal-creation|web-runtime-session-tab-lifecycle|web-session-tabs-sync\/use-web-session-tabs-sync|web-session-terminal-orphan-(?:topology|recovery(?:-(?:adoption|surface|inventory|inventory-validation|cache|queue|rpc-lane|pane))?))\.ts)$/.test(
         file
       )
   },
@@ -353,7 +398,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     specs: ['tests/e2e/paired-remote-pane-layout-retry.spec.ts'],
     matches: (file) =>
       isProductSource(file) &&
-      /^(?:src\/renderer\/src\/components\/terminal-pane\/(?:remote-pane-layout-push|TerminalPane)\.tsx?|src\/renderer\/src\/lib\/terminal-layout-equality\.ts|src\/renderer\/src\/runtime\/web-session-tabs-sync\.ts|src\/renderer\/src\/store\/slices\/terminals\.ts)$/.test(
+      /^(?:src\/renderer\/src\/components\/terminal-pane\/(?:remote-pane-layout-push|TerminalPane)\.tsx?|src\/renderer\/src\/lib\/terminal-layout-equality\.ts|src\/renderer\/src\/runtime\/web-session-tabs-sync\/use-web-session-tabs-sync\.ts|src\/renderer\/src\/store\/slices\/terminals\.ts)$/.test(
         file
       )
   },
@@ -379,9 +424,10 @@ export const PR_E2E_SOURCE_ROUTES = [
     specs: ['tests/e2e/paired-client-hosted-browser-restart-survival.spec.ts'],
     matches: (file) =>
       isProductSource(file) &&
-      /^src\/.*(?:[Cc]lient-?[Hh]osted|browser-host-(?:lease|page|client-page)|browser-client-(?:host|page)|runtime-browser-(?:client-)?page|session-tabs-sync|host-session-snapshot-authority|orca-runtime(?:-browser)?\.ts|\/runtime-(?:status|types)\.ts)/.test(
-        file
-      )
+      (file === 'src/main/runtime/browser/browser-commands.ts' ||
+        /^src\/.*(?:[Cc]lient-?[Hh]osted|browser-host-(?:lease|page|client-page)|browser-client-(?:host|page)|runtime-browser-(?:client-)?page|session-tabs-sync|host-session-snapshot-authority|orca-runtime\.ts|\/runtime-(?:status|types)\.ts)/.test(
+          file
+        ))
   }
 ]
 

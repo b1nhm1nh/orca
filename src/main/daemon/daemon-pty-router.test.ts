@@ -4,7 +4,7 @@ import { DaemonPtyRouter } from './daemon-pty-router'
 import { stubWriteSettlement } from '../providers/settled-pty-write-stub'
 import { SessionNotFoundError, TerminalSessionOwnerUnverifiedError } from './daemon-errors'
 import type { DaemonPtyAdapter } from './daemon-pty-adapter'
-import type { PtySpawnResult } from '../providers/types'
+import type { PtySpawnResult } from '../providers/pty-provider-contract'
 import {
   AGENT_SESSION_CLAIM_DAEMON_PROTOCOL_VERSION,
   AGENT_SESSION_CREATE_OPERATION_DAEMON_PROTOCOL_VERSION
@@ -463,11 +463,13 @@ describe('DaemonPtyRouter', () => {
 
   it('drops a legacy mapping after the routed session exits', async () => {
     const current = createAdapter('current')
-    const legacy = createAdapter('legacy', ['legacy-session'])
+    const legacySessions = ['legacy-session']
+    const legacy = createAdapter('legacy', legacySessions)
     const router = new DaemonPtyRouter({ current, legacy: [legacy] })
 
     await router.discoverLegacySessions()
 
+    legacySessions.length = 0
     legacy.emitExit('legacy-session', 0)
     await router.spawn({ sessionId: 'legacy-session', cols: 80, rows: 24 })
 

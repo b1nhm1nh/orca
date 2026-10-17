@@ -3,7 +3,7 @@
 // through the runtime controller registerPtyHandlers installs. Suites still declare the IPC vi.mock block.
 import { vi } from 'vitest'
 import type { Mock } from 'vitest'
-import { registerPtyHandlers } from './pty'
+import { registerPtyHandlers } from './pty/register-handlers'
 import { existsSyncMock, statSyncMock } from './pty-ipc-mock-registry'
 import type { PtyIpcSuiteFixtures } from './pty-ipc-test-harness'
 import { OrcaRuntimeService } from '../runtime/orca-runtime'
@@ -62,11 +62,11 @@ export function restoreMainPlatform(): void {
   savedEnv.clear()
 }
 
-/** Settings both lanes read on main's current OS; the untrimmed default shell shows which reads trim it. */
+/** Settings both lanes read on main's current OS; the default shell is stored trimmed, as settings load leaves it. */
 function parityMainSettings(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     // Windows hides the default-shell setting and defaults it to ''.
-    terminalDefaultShell: process.platform === 'win32' ? '' : '  /bin/zsh  ',
+    terminalDefaultShell: process.platform === 'win32' ? '' : '/bin/zsh',
     terminalDefaultShellArgs: ['-l'],
     terminalWindowsShell: 'powershell.exe',
     terminalWindowsPowerShellImplementation: 'auto',
@@ -146,7 +146,13 @@ export function startParityLanes(
 ): ParityLanes {
   const settings = parityMainSettings(args.settings)
   const persistPtyBinding = vi.fn(async () => true)
-  const { repo, folderWorkspace } = launchScope(args.workspace)
+  const { repo: scopeRepo, folderWorkspace } = launchScope(args.workspace)
+  // A folder's contained repo is saved too, so the host can borrow its runtime if it would.
+  const repo =
+    scopeRepo ??
+    (args.workspace.repoPath
+      ? launchScope({ kind: 'repo', path: args.workspace.repoPath }).repo
+      : null)
   const store = {
     getSettings: () => settings,
     getProjects: () => [

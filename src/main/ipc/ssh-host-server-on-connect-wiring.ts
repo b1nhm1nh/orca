@@ -8,12 +8,16 @@ import { listEnvironments } from '../../shared/runtime-environment-store'
 import { findOrcadMigrationSourceCutoverForTarget } from '../ssh/orcad-migration-cutover-journal'
 import { abandonOrcadConversion } from '../ssh/orcad-conversion-abandon'
 import { retainOrcadMigrationSource } from '../ssh/orcad-migration-source-retention'
-import { hasOrcadTemplate } from '../ssh/orcad-artifact-materializer'
+import { hasOrcadTemplate } from '../orcad/orcad-artifact-materializer'
 import { managedServerUpdateDeps } from '../ssh/managed-server-update-deps'
 import { ensureOrcadManagedTunnel } from '../ssh/orcad-managed-tunnel'
 import { verifyOrcadManagedServing } from '../ssh/orcad-managed-serving-verify'
 import { convertSshTargetToManagedOrcad } from '../ssh/orcad-runtime-conversion'
-import { orcadMigrationDestinationFor } from '../ssh/orcad-runtime-conversion-wiring'
+import {
+  orcadMigrationDestinationFor,
+  orcadServerFolderCatalogFor,
+  orcadServerRepositoriesFor
+} from '../ssh/orcad-runtime-conversion-wiring'
 import { createManagedOrcadEnvironment } from '../ssh/orcad-runtime-deployment'
 import type { HostServerOnConnectDeps } from '../ssh/ssh-host-server-on-connect'
 import {
@@ -31,6 +35,7 @@ import { releaseUnreachableOrcadSetup } from '../ssh/orcad-unreachable-setup-rel
 import { getCurrentMainWindow } from './ssh-ipc-context'
 import { broadcastSshState } from './ssh-renderer-broadcast'
 import { connectInFlight } from './ssh-connect-attempt-registry'
+import { startLegacyRelayBridge } from '../ssh/legacy-relay-bridge/legacy-relay-bridge-registry'
 
 export function hostServerOnConnectDeps(userDataPath: string): HostServerOnConnectDeps {
   const registry = getSshTargetRegistryStore()!
@@ -89,16 +94,29 @@ export function hostServerOnConnectDeps(userDataPath: string): HostServerOnConne
         name: target.orcadProvisioning?.name ?? managedOrcadServerName(target),
         sshTargetId: target.id
       }),
-    convert: (target, hostProof) =>
-      convertSshTargetToManagedOrcad(userDataPath, {
+    convert: async (target, hostProof) => {
+      // COMPAT(legacy-relay-bridge): find the panes old relays still run before the tabs remount.
+      if (hostProof?.bridged) {
+        await startLegacyRelayBridge(target.id)
+      }
+      const converted = await convertSshTargetToManagedOrcad(userDataPath, {
         sshTargetId: target.id,
         name: managedOrcadServerName(target),
         // The connect's own census already answered; a conversion before any session reuses it.
         censusHost: (host) =>
           hostProof ? Promise.resolve(hostProof) : censusHostRelayTerminalsFor(host)(),
         // Why no releaseDirectSession: a disconnect here would cancel the connect that asked for it.
-        destinationFor: orcadMigrationDestinationFor
-      }),
+        destinationFor: orcadMigrationDestinationFor,
+        serverRepositoriesFor: orcadServerRepositoriesFor,
+        serverFolderCatalogFor: orcadServerFolderCatalogFor
+      })
+      if (converted.outcome === 'converted' || converted.outcome === 'refused') {
+        // "Move anyway" covers one attempt; a later move, or a later delta, asks again.
+        // Kept on a throw: verifyFence re-exports with it, so a held fence could never resume.
+        registry.updateTarget(target.id, { managedServerLeaveBehind: undefined })
+      }
+      return converted
+    },
     abandonDeploy: async (target) => {
       const environmentId =
         getManagedOrcadFenceEnvironmentId(target) ??

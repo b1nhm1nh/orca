@@ -40,7 +40,7 @@ import {
 } from './provider-account-visibility'
 import { GrokAccountsSection } from './GrokAccountsSection'
 import { AntigravityAccountsSection } from './AntigravityAccountsSection'
-import type { RuntimeClientTarget } from '@/runtime/runtime-client-target'
+import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
 import { runtimeTargetEnvironmentId } from '@/runtime/runtime-client-target'
 import { CursorAccountsSection } from './CursorAccountsSection'
 import { renderGatewayAccountsSections } from './accounts-pane-gateway-sections'
@@ -51,7 +51,11 @@ import type {
   CodexAccountAction,
   RemoveAccountTarget
 } from './accounts-pane-types'
-import { EMPTY_WSL_DISTROS, getSelectedAccountRuntime } from './accounts-pane-runtime'
+import {
+  EMPTY_WSL_DISTROS,
+  getRuntimeSentenceLabel,
+  getSelectedAccountRuntime
+} from './accounts-pane-runtime'
 import { watchCodexConfigSyncStatus } from './accounts-pane-config-sync'
 import {
   createClaudeAccountActionRunner,
@@ -79,7 +83,8 @@ export function AccountsPane({
   wslAvailable = false,
   wslDistros = EMPTY_WSL_DISTROS,
   wslCapabilitiesLoading = false,
-  accountOwnerPlatform = null
+  accountOwnerPlatform = null,
+  wslHostDistro = null
 }: AccountsPaneProps): React.JSX.Element {
   const searchQuery = useAppStore((s) => s.settingsSearchQuery)
   const codexRateLimits = useAppStore((s) => s.rateLimits.codex)
@@ -105,7 +110,8 @@ export function AccountsPane({
     wslSupportedPlatform,
     wslAvailable,
     wslDistros,
-    wslCapabilitiesLoading
+    wslCapabilitiesLoading,
+    wslHostDistro
   )
   // Why: a server owns its provider accounts (see #7973); every list/select/remove
   // below goes to the host chosen in the page, never to the focused one.
@@ -133,17 +139,10 @@ export function AccountsPane({
   const accountRuntime = isRemoteAccountScope
     ? { runtime: 'host' as const, label: remoteServerLabel ?? '' }
     : localAccountRuntime
-  // Why: host runtime labels are standalone UI labels; interpolated prose needs sentence casing.
-  const accountRuntimeSentenceLabel =
-    !isRemoteAccountScope &&
-    accountRuntime.runtime === 'host' &&
-    !navigator.userAgent.includes('Windows')
-      ? `${accountRuntime.label.charAt(0).toLocaleLowerCase()}${accountRuntime.label.slice(1)}`
-      : accountRuntime.label
-  const localAccountRuntimeSentenceLabel =
-    localAccountRuntime.runtime === 'host' && !navigator.userAgent.includes('Windows')
-      ? `${localAccountRuntime.label.charAt(0).toLocaleLowerCase()}${localAccountRuntime.label.slice(1)}`
-      : localAccountRuntime.label
+  const accountRuntimeSentenceLabel = isRemoteAccountScope
+    ? accountRuntime.label
+    : getRuntimeSentenceLabel(accountRuntime)
+  const localAccountRuntimeSentenceLabel = getRuntimeSentenceLabel(localAccountRuntime)
   // Why: users read the remote-scoped list as their desktop accounts being
   // deleted (#8186); say they are intact and link the default-runtime control.
   // The web client has no desktop-owned accounts and cannot select Local
@@ -398,6 +397,7 @@ export function AccountsPane({
     ) : null,
     wslSupportedPlatform &&
     !isRemoteAccountScope &&
+    !wslHostDistro &&
     matchesSettingsSearch(searchQuery, getAccountsLocationSearchEntries())
       ? renderAccountsLocationSection(model)
       : null,
